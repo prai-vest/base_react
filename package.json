@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "webpack-dev-server --config ./webpack.config.dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -40,15 +41,9 @@
   },
   "dependencies": {
     "@hot-loader/react-dom": "^16.13.0",
-    "@root/request": "^1.6.1",
     "axios": "^0.19.2",
-    "cheerio": "^1.0.0-rc.3",
     "classnames": "^2.2.6",
-    "cors": "^2.8.5",
     "date-fns": "^2.13.0",
-    "express": "^4.17.1",
-    "express-history-api-fallback": "^2.2.1",
-    "mongodb": "^3.5.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hot-loader": "^4.12.21",
@@ -57,7 +52,6 @@
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "webpack": "^4.43.0",
-    "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0"
   }
 }
