@@ -1,0 +1,24 @@
+.rebalance-right {
+  width: 60%;
+  min-width: 735px;
+}
+
+.rebalancer {
+  height: 470px;
+}
+
+.open-option-block {
+  label {
+    display: block;
+  }
+  & > .block-top {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  fieldset {
+    input {
+      width: 100px;
+    }
+  }
+}

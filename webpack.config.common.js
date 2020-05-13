@@ -14,6 +14,10 @@ module.exports = {
         use: ['babel-loader'],
       },
       {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
         test: /\.scss$/,
         use: ['style-loader', 'css-loader', {
             loader: 'sass-loader',
@@ -44,21 +48,15 @@ module.exports = {
       'react-dom': '@hot-loader/react-dom',
       '@': path.resolve(__dirname, 'src'),
       Components: path.resolve(__dirname, 'src/components'),
-      // Contexts: path.resolve(__dirname, 'src/components/contexts'),
-      // Core: path.resolve(__dirname, 'src/components/core'),
-      // Pages: path.resolve(__dirname, 'src/components/Pages'),
       Utils: path.resolve(__dirname, 'src/utils'),
-      // Root: path.resolve(__dirname),
       // scss: path.resolve(__dirname, 'src/scss'),
-      // Api: path.resolve(__dirname, 'src/api'),
-      // Images: path.resolve(__dirname, 'src/images'),
     },
     plugins: [
       new DirectoryNamedWebpackPlugin(),
     ],
   },
   plugins: [
-    new webpack.NormalModuleReplacementPlugin(/debug/, `${process.cwd()}/support/noop.js`),
+    // new webpack.NormalModuleReplacementPlugin(/debug/, `${process.cwd()}/support/noop.js`),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: 'src/index.html',

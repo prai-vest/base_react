@@ -5,13 +5,14 @@ const common = require('./webpack.config.common')
 module.exports = merge(common, {
   mode: 'development',
   entry: {
-    app: ['webpack-hot-middleware/client', './src/index.js'],
+    app: ['./src/index.js'],
   },
   devtool: 'inline-source-map',
   devServer: {
     contentBase: './dist',
     historyApiFallback: true,
     hot: true,
+    port: 8004,
   },
   output: {
     filename: '[name].bundle.js',
