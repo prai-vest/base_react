@@ -1039,6 +1039,14 @@
     "@progress/kendo-react-common" "3.14.0"
     prop-types "^15.6.0"
 
+"@progress/kendo-react-tooltip@^3.14.0":
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-react-tooltip/-/kendo-react-tooltip-3.14.0.tgz#45b49065e4acf998f532313baae1875dfd7d05ca"
+  integrity sha512-v6br4hJfcTInrWeEPpzYTUk7HCw7VDOwP7bB5QIYXp9wMvQmi+ZMvEg/VxcgH7r2M5AGlGOkP47NdCqHwk1NNA==
+  dependencies:
+    "@progress/kendo-react-common" "3.14.0"
+    prop-types "^15.6.0"
+
 "@progress/kendo-theme-default@^4.18.1":
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/@progress/kendo-theme-default/-/kendo-theme-default-4.18.1.tgz#9f5403d7e26a884894dcd66af072491ea888b1ff"
