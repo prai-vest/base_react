@@ -3,7 +3,7 @@ import {
   DropDownList,
 } from '@progress/kendo-react-dropdowns'
 import {
- FieldWrapper, Form, Field, FormElement,
+ Form, Field, FormElement,
 } from '@progress/kendo-react-form'
 import { Label, Error } from '@progress/kendo-react-labels'
 import { Input } from '@progress/kendo-react-inputs'
@@ -32,7 +32,7 @@ const getValidateFunc = (validatorsArr) => (value) => {
   }
 const securityValidator = getValidateFunc([validators.required, validators.reg])
 const numericValidator = getValidateFunc([validators.required, validators.numeric])
-const optionSelectValidator = (value) => value ? '' : 'Please select a strategy'
+// const optionSelectValidator = (value) => value ? '' : 'Please select a strategy'
 
 
 const MyInput = (fieldRenderProps) => {
@@ -85,7 +85,7 @@ export default class OptionBlock extends React.Component {
         <Form
           onSubmit={this.handleSubmit}
           ref={this.setFormRef}
-          render={(formRenderProps) => (
+          render={() => (
             <FormElement>
               <div className="open-option-block">
                 <div className="block-top">
