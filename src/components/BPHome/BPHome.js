@@ -1,15 +1,21 @@
 import React, { Profiler } from 'react'
-import { Button } from '@progress/kendo-react-buttons'
-// import { DatePicker } from '@progress/kendo-react-dateinputs'
-// import { Button, ButtonGroup, DropDownButton, DropDownButtonItem,
-// SplitButton, SplitButtonItem, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
 import {
- Card, CardHeader, CardTitle, CardBody, CardFooter,
-} from '@progress/kendo-react-layout'
-import OptionBlock from './OptionBlock'
-import '@progress/kendo-theme-default/dist/all.css'
-import './Home.scss'
+ Button, Intent, HTMLSelect,
+  InputGroup, Icon,
+} from '@blueprintjs/core'
+import Form from './Form'
+import FormField from './FormField'
+import BPOptionBlock from './BPOptionBlock'
+import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+import '@blueprintjs/core/lib/css/blueprint.css'
+import 'normalize.css'
+import './BPHome.scss'
 
+const OPTIONS_STRATEGY = [
+  { label: 'Choose One', value: null },
+  { label: 'Covered Call', value: 1 },
+  { label: 'Protective Put', value: 2 },
+]
 export default class Home extends React.Component {
   optionBlocksRef = []
 
@@ -19,10 +25,6 @@ export default class Home extends React.Component {
 
   state = {
     optionBlocks: [],
-  }
-
-  componentDidMount() {
-    console.log('hello')
   }
 
   addOptionBlock = () => {
@@ -46,8 +48,8 @@ export default class Home extends React.Component {
   }
 
   deregisterOptionBlock = (ref, blockKey) => {
-    this.optionBlocksRef = this.optionBlocksRef
-    .filter((i) => i._id !== ref._id)
+    const remaining = this.optionBlocksRef.filter((i) => i._id !== ref._id)
+    this.optionBlocksRef = remaining
     if (this.runDataBlocks[ref._id]) {
       delete this.runDataBlocks[ref._id]
     }
@@ -64,32 +66,33 @@ profilerId, mode, actualTime, baseTime, startTime, commitTime,
 
   render() {
     const { optionBlocks } = this.state
+
     return (
-      <Profiler id="Kendo Home" onRender={this.cb}>
+      <Profiler id="Blueprint App" onRender={this.cb}>
         <div className="rebalance-right">
-          <h4>Rebalance</h4>
-          <Card className="rebalancer">
-            <CardHeader>
-              <CardTitle style={{ fontSize: '16px' }}>Open Option Strategies:</CardTitle>
-              <Button primary icon="arrow-down" onClick={this.addOptionBlock}>Add</Button>
-            </CardHeader>
-            <CardBody>
+          <h2>Blueprint Rebalancer</h2>
+          <div className="card">
+            <div className="card-head">
+              <div className="card-title">Open Option Strategies: </div>
+              <Button intent={Intent.PRIMARY} rightIcon="arrow-down" onClick={this.addOptionBlock}>Add</Button>
+            </div>
+            <div className="card-body">
               <div className="rebalance-blocks-container">
                 {optionBlocks.map((i) => (
-                  <OptionBlock
+                  <BPOptionBlock
                     key={i}
                     keyprop={i}
                     handleSubmit={this.populateDataBlock}
                     handleDelete={this.deregisterOptionBlock}
                     registerRef={this.registerOptionBlock}
                   />
-               ))}
+              ))}
               </div>
-            </CardBody>
-            <CardFooter>
-              <Button onClick={this.run} disabled={optionBlocks.length === 0}>Run</Button>
-            </CardFooter>
-          </Card>
+            </div>
+            <div className="card-footer">
+              <Button intent={Intent.SUCCESS}>Run</Button>
+            </div>
+          </div>
         </div>
       </Profiler>
     )

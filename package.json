@@ -40,6 +40,8 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@blueprintjs/core": "^3.26.1",
+    "@blueprintjs/icons": "^3.16.0",
     "@hot-loader/react-dom": "^16.13.0",
     "@progress/kendo-drawing": "^1.7.0",
     "@progress/kendo-react-buttons": "^3.13.0",
@@ -56,6 +58,7 @@
     "axios": "^0.19.2",
     "classnames": "^2.2.6",
     "date-fns": "^2.13.0",
+    "normalize.css": "^8.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hot-loader": "^4.12.21",

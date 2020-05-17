@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Profiler } from 'react'
 import {
   DropDownList,
 } from '@progress/kendo-react-dropdowns'
@@ -63,8 +63,9 @@ export default class OptionBlock extends React.Component {
   setFormRef = (ref) => {
     const { registerRef } = this.props
     this.formRef = ref
-    console.log(ref)
-    registerRef(ref)
+    if (ref) {
+      registerRef(ref)
+    }
     // console.log(this.props.keyprop)
   }
 
@@ -78,10 +79,15 @@ export default class OptionBlock extends React.Component {
     handleDelete(this.formRef, keyprop)
   }
 
+  cb(profilerId, mode, actualTime, baseTime, startTime, commitTime) {
+    console.log({
+profilerId, mode, actualTime, baseTime, startTime, commitTime,
+})
+  }
 
   render() {
     return (
-      <>
+      <Profiler id="Kendo" onRender={this.cb}>
         <Form
           onSubmit={this.handleSubmit}
           ref={this.setFormRef}
@@ -94,6 +100,7 @@ export default class OptionBlock extends React.Component {
                       name="strategy"
                       component={DropDownList}
                       data={OPTIONS_STRATEGY}
+                      label="Strategy"
                       textField="text"
                       valueMap={(value) => value && value.id}
                       defaultItem={{ text: 'Choose One', id: null }}
@@ -121,6 +128,7 @@ export default class OptionBlock extends React.Component {
                     <div className="select-wrapper">
                       <Field
                         name="rounding"
+                        label="Rounding"
                         component={DropDownList}
                         data={['Round Up', 'Round Down']}
                         defaultItem="Round Nearest"
@@ -135,7 +143,7 @@ export default class OptionBlock extends React.Component {
             </FormElement>
         )}
         />
-      </>
+      </Profiler>
     )
   }
 }

@@ -5,9 +5,9 @@ import {
 import React from 'react'
 import KendoFormExample from 'Components/KendoFormExample'
 import Home from 'Components/Home'
+import BPHome from 'Components/BPHome'
 import Demo from 'Components/demo'
 import './App.scss'
-import '@progress/kendo-theme-default/dist/all.css'
 
 
 function App() {
@@ -19,6 +19,7 @@ function App() {
             <li><Link to="/">Main</Link></li>
             <li><Link to="/components">Components</Link></li>
             <li><Link to="/kendoForm">KendoFormExample</Link></li>
+            <li><Link to="/blueprint">Blueprint</Link></li>
           </ul>
         </nav>
         <div className="container">
@@ -26,6 +27,7 @@ function App() {
             <Route exact path="/" component={Home} />
             <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
+            <Route path="/blueprint" component={BPHome} />
           </Switch>
         </div>
       </div>

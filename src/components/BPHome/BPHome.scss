@@ -1,0 +1,81 @@
+
+$box-shadow-color: rgba(10, 10, 10, .1);
+$blueprint-box-shadow-color: rgba(16,22,26,.15);
+
+.rebalance-right {
+  width: 60%;
+  min-width: 740px;
+  color: #182026;
+}
+
+.card {
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.card {
+  box-shadow: 0 0 0 1px $blueprint-box-shadow-color;
+  border-radius: 3px;
+
+  .card-head {
+    border-bottom: 1px solid $blueprint-box-shadow-color;
+    padding: .75rem 1rem;
+  }
+  .card-body {
+    border-bottom: 1px solid $blueprint-box-shadow-color;
+    padding: .75rem 1rem;
+  }
+  .card-footer {
+    padding: .75rem 1rem;
+  }
+}
+
+.rebalance-blocks-container {
+  height: 400px;
+  box-shadow: 0 0 0 1px $blueprint-box-shadow-color;
+
+  .open-option-block {
+    input {
+      width: 95px;
+    }
+
+    .own-fieldset {
+      .form-field {
+        margin-top: 1rem;
+      }
+      .form-field:nth-child(2) {
+        margin: 1rem 15px 0;
+      }
+    }
+    .del-icon {
+      cursor:pointer;
+    }
+  }
+}
+
+.open-option-block {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 2px;
+  .reb-field {
+    width: 20px;
+  }
+}
+
+.form-field {
+  .validation-message {
+    font-size: 14px;
+    color: #d9822b;
+  }
+}
+.validation-tooltip-text {
+  font-size: 12px;
+}
