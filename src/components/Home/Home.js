@@ -6,6 +6,7 @@ import { Button } from '@progress/kendo-react-buttons'
 import {
  Card, CardHeader, CardTitle, CardBody, CardFooter,
 } from '@progress/kendo-react-layout'
+// import range from 'Utils/range'
 import OptionBlock from './OptionBlock'
 import '@progress/kendo-theme-default/dist/all.css'
 import './Home.scss'

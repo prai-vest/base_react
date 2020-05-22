@@ -11,9 +11,6 @@ export default class FormField extends Component {
     errors: [],
   }
 
-  componentDidMount() {
-  }
-
   renderToolTippedFormField = (children, errors) => (errors.length === 0
       ? children
       : (
@@ -30,6 +27,7 @@ export default class FormField extends Component {
     const {
       dataField, onChange, errors,
     } = this.props
+
     const newChildren = React.Children.map(children, (child) => React.cloneElement(child, {
       className: cn('vm', 'input'),
       intent: errors.length ? Intent.DANGER : '',

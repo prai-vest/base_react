@@ -56,10 +56,6 @@ const MyInput = (fieldRenderProps) => {
 }
 
 export default class OptionBlock extends React.Component {
-  componentDidMount() {
-    console.log('Mounted')
-  }
-
   setFormRef = (ref) => {
     const { registerRef } = this.props
     this.formRef = ref
@@ -79,71 +75,63 @@ export default class OptionBlock extends React.Component {
     handleDelete(this.formRef, keyprop)
   }
 
-  cb(profilerId, mode, actualTime, baseTime, startTime, commitTime) {
-    console.log({
-profilerId, mode, actualTime, baseTime, startTime, commitTime,
-})
-  }
-
   render() {
     return (
-      <Profiler id="Kendo" onRender={this.cb}>
-        <Form
-          onSubmit={this.handleSubmit}
-          ref={this.setFormRef}
-          render={() => (
-            <FormElement>
-              <div className="open-option-block">
-                <div className="block-top">
+      <Form
+        onSubmit={this.handleSubmit}
+        ref={this.setFormRef}
+        render={() => (
+          <FormElement>
+            <div className="open-option-block">
+              <div className="block-top">
+                <div className="select-wrapper">
+                  <Field
+                    name="strategy"
+                    component={DropDownList}
+                    data={OPTIONS_STRATEGY}
+                    label="Strategy"
+                    textField="text"
+                    valueMap={(value) => value && value.id}
+                    defaultItem={{ text: 'Choose One', id: null }}
+                  />
+                </div>
+                <Field
+                  name="underlyingsymbol"
+                  component={MyInput}
+                  label="Underlying Symbol"
+                  validator={securityValidator}
+                />
+                <div className="own-fieldset">
+                  <Field
+                    name="changePercentage"
+                    component={MyInput}
+                    label="% Change"
+                    validator={numericValidator}
+                  />
+                  <Field
+                    name="targetPercentage"
+                    component={MyInput}
+                    label="Target %"
+                    validator={numericValidator}
+                  />
                   <div className="select-wrapper">
                     <Field
-                      name="strategy"
+                      name="rounding"
+                      label="Rounding"
                       component={DropDownList}
-                      data={OPTIONS_STRATEGY}
-                      label="Strategy"
-                      textField="text"
-                      valueMap={(value) => value && value.id}
-                      defaultItem={{ text: 'Choose One', id: null }}
+                      data={['Round Up', 'Round Down']}
+                      defaultItem="Round Nearest"
                     />
-                  </div>
-                  <Field
-                    name="underlyingsymbol"
-                    component={MyInput}
-                    label="Underlying Symbol"
-                    validator={securityValidator}
-                  />
-                  <div className="own-fieldset">
-                    <Field
-                      name="changePercentage"
-                      component={MyInput}
-                      label="% Change"
-                      validator={numericValidator}
-                    />
-                    <Field
-                      name="targetPercentage"
-                      component={MyInput}
-                      label="Target %"
-                      validator={numericValidator}
-                    />
-                    <div className="select-wrapper">
-                      <Field
-                        name="rounding"
-                        label="Rounding"
-                        component={DropDownList}
-                        data={['Round Up', 'Round Down']}
-                        defaultItem="Round Nearest"
-                      />
-                    </div>
-                  </div>
-                  <div className="reb-field delete-col">
-                    <span className="k-icon k-i-trash" onClick={this.ownHandleDelete} />
                   </div>
                 </div>
+                <div className="reb-field delete-col">
+                  <span className="k-icon k-i-trash" onClick={this.ownHandleDelete} />
+                </div>
               </div>
-            </FormElement>
+            </div>
+          </FormElement>
         )}
-        />
-      </Profiler>
+      />
     )
   }
 }

@@ -6,6 +6,7 @@ import React from 'react'
 import KendoFormExample from 'Components/KendoFormExample'
 import Home from 'Components/Home'
 import BPHome from 'Components/BPHome'
+import BPComponents from 'Components/BPComponents'
 import Demo from 'Components/demo'
 import './App.scss'
 
@@ -19,6 +20,7 @@ function App() {
             <li><Link to="/">Main</Link></li>
             <li><Link to="/components">Components</Link></li>
             <li><Link to="/kendoForm">KendoFormExample</Link></li>
+            <li><Link to="/bpcomponents">BP-Components</Link></li>
             <li><Link to="/blueprint">Blueprint</Link></li>
           </ul>
         </nav>
@@ -27,6 +29,7 @@ function App() {
             <Route exact path="/" component={Home} />
             <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
+            <Route path="/bpcomponents" component={BPComponents} />
             <Route path="/blueprint" component={BPHome} />
           </Switch>
         </div>

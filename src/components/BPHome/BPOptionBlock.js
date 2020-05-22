@@ -37,71 +37,63 @@ export default class BPHome extends Component {
     console.log('hello')
   }
 
-  cb(profilerId, mode, actualTime, baseTime, startTime, commitTime) {
-    console.log({
-profilerId, mode, actualTime, baseTime, startTime, commitTime,
-})
-  }
-
   render() {
     return (
-      <Profiler id="Blueprint" onRender={this.cb}>
-        <div className="open-option-block">
-          <Form
-            data={{
+      <div className="open-option-block">
+        <Form
+          data={{
           underlyingsymbol: '',
           changePercantage: '',
           targetPercentage: '',
         }}
+        >
+          <div className="form-field">
+            <label>Strategy</label>
+            <HTMLSelect
+              options={OPTIONS_STRATEGY}
+            />
+          </div>
+          <FormField
+            dataField="underlyingsymbol"
+            errorType="tooltip"
+            label="Underlying Symbol"
+            validator={securityValidator}
           >
-            <div className="form-field">
-              <label>Strategy</label>
-              <HTMLSelect
-                options={OPTIONS_STRATEGY}
-              />
-            </div>
+            <InputGroup />
+          </FormField>
+
+          <div className="own-fieldset">
             <FormField
-              dataField="underlyingsymbol"
+              dataField="changePercentage"
               errorType="tooltip"
-              label="Underlying Symbol"
-              validator={securityValidator}
+              label="% Change"
+              validator={numericValidator}
             >
               <InputGroup />
             </FormField>
 
-            <div className="own-fieldset">
-              <FormField
-                dataField="changePercentage"
-                errorType="tooltip"
-                label="% Change"
-                validator={numericValidator}
-              >
-                <InputGroup />
-              </FormField>
-
-              <FormField
-                dataField="targetPercentage"
-                errorType="tooltip"
-                label="Target %"
-                validator={numericValidator}
-              >
-                <InputGroup />
-              </FormField>
-              <div className="form-field">
-                <label>Rounding</label>
-                <HTMLSelect
-                  options={
+            <FormField
+              dataField="targetPercentage"
+              errorType="tooltip"
+              label="Target %"
+              validator={numericValidator}
+            >
+              <InputGroup />
+            </FormField>
+            <div className="form-field">
+              <label>Rounding</label>
+              <HTMLSelect
+                options={
                 ['Round Nearest', 'Round Up', 'Round Down']
               }
-                />
-              </div>
+              />
             </div>
-            <div className="reb-field">
-              <Icon className="del-icon" icon="trash" intent={Intent.WARNING} />
-            </div>
-          </Form>
-        </div>
-      </Profiler>
+          </div>
+          <div className="reb-field">
+            <Icon className="del-icon" icon="trash" intent={Intent.WARNING} />
+          </div>
+        </Form>
+      </div>
     )
   }
 }

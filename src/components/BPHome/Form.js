@@ -85,10 +85,9 @@ export default class Form extends React.Component {
   render() {
     const { children, data } = this.props
     return (
-      <div key={data}>
+      <form key={data}>
         {this.renderForm(children)}
-        <button onClick={this.test}>Test</button>
-      </div>
+      </form>
     )
   }
 }
