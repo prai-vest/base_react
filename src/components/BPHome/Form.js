@@ -1,30 +1,62 @@
 import React from 'react'
+import { Button } from '@blueprintjs/core'
 
-const defaultValidator = () => ''
+import './Form.scss'
 
 /* eslint-disable class-methods-use-this */
-export default class Form extends React.Component {
+export default class Form extends React.PureComponent {
   static defaultProps = {
     data: {},
   }
 
+  syntheticResetCandidates = []
+
+  formRef = React.createRef()
+
   state = {
     data: {},
-    errors: [],
+    canSubmit: true,
   }
 
-  validators = {}
-
   componentDidMount() {
-    const { data, children } = this.props
-    const newData = { ...data }
-    this.setState({ data: newData })
-    this.registerValidators(children)
+    // const { data } = this.props
+    // const newData = { ...data }
+    // this.setState({ data: newData })
+    this.formRef.current.addEventListener('reset', () => {
+      this.syntheticResetCandidates.forEach((item) => {
+        if (item.reset) {
+          item.reset()
+        }
+      })
+    })
+  }
+
+  ensureIfAbleToSubmit = () => {
+    const errRef = this.syntheticResetCandidates
+      .find((item) => item.state && item.state.errors && item.state.errors.length)
+    if (errRef) {
+      this.disableSubmit()
+    } else {
+      this.enableSubmit()
+    }
+  }
+
+  enableSubmit = () => {
+    this.setState({ canSubmit: true })
+  }
+
+  disableSubmit = () => {
+    this.setState({ canSubmit: false })
+  }
+
+  registerSyntheticCandidates = (ref) => {
+    this.syntheticResetCandidates.push(ref)
   }
 
   fieldOnChangeHandler = (event) => {
     const dataField = event.target.getAttribute('dataField')
     const newValue = event.target.value
+    /* todo setPathValue here */
     this.setState(({ data }) => {
       const newData = data
       newData[dataField] = newValue
@@ -34,26 +66,19 @@ export default class Form extends React.Component {
     })
   }
 
-  test = () => {
+  handleSubmit = (event) => {
+    event.preventDefault()
     console.log(this.state.data)
-    console.log(this.props.data)
-    console.log(this.validators)
   }
 
-  registerValidators = (children) => {
-    React.Children.map(children, (child) => {
-      if (!child.props) return child
-      const { validator, dataField, children: childChildren } = child.props
-      if (validator) {
-        this.validators[dataField] = validator
-      }
-      if (childChildren) {
-        this.registerValidators(childChildren)
-      }
-    })
+  test = () => {
+    console.log(this.state)
+    console.log(this.syntheticResetCandidates)
+    console.log(this.syntheticResetCandidates[0].state)
   }
 
-  renderForm(children) {
+  renderForm = (children) => {
+    console.log('[Form] rendered')
     const { data: initialData } = this.props
     const { data: currentData, errors } = this.state
     const modifiedChild = React.Children.map(children, (child) => {
@@ -63,11 +88,12 @@ export default class Form extends React.Component {
         // * Hook onChange and errors and anyOther
         // * mayBe also value and Initial Value
         // * Hence Form-Field becomes strictly controlled?
-
         return React.cloneElement(child, {
           initialValue: initialData[dataField],
           currentValue: currentData[dataField],
+          ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           onChange: this.fieldOnChangeHandler,
+          registerSyntheticCandidates: this.registerSyntheticCandidates,
           errors,
         })
       }
@@ -83,11 +109,16 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const { children, data } = this.props
+    const { children } = this.props
     return (
-      <form key={data}>
+      <form ref={this.formRef} onSubmit={this.handleSubmit} className="vm form">
         {this.renderForm(children)}
+        <div className="form-buttons">
+          <Button onClick={this.test} text="Test" />
+          <Button type="submit" text="Submit" />
+        </div>
       </form>
+
     )
   }
 }

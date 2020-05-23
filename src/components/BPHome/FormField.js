@@ -11,6 +11,25 @@ export default class FormField extends Component {
     errors: [],
   }
 
+  currentInputValue = null
+
+  // state = {
+  //   currentInputValue: null,
+  //   errors: [],
+  // }
+
+  componentDidMount() {
+    const { registerSyntheticCandidates } = this.props
+    registerSyntheticCandidates(this)
+  }
+
+  handleInputChange = (event) => {
+    const { onChange } = this.props
+    const { target: { value } } = event
+    this.currentInputValue = value
+    // validation
+  }
+
   renderToolTippedFormField = (children, errors) => (errors.length === 0
       ? children
       : (
@@ -25,15 +44,22 @@ export default class FormField extends Component {
 
   renderFormField(children) {
     const {
-      dataField, onChange, errors,
+      dataField, onChange, errors, registerSyntheticCandidates,
     } = this.props
 
-    const newChildren = React.Children.map(children, (child) => React.cloneElement(child, {
-      className: cn('vm', 'input'),
-      intent: errors.length ? Intent.DANGER : '',
-      datafield: dataField,
-      onChange,
-    }))
+    const newChildren = React.Children.map(children, (child) => {
+      const extraProps = {}
+      if (child.props.registerForSyntheticReset) {
+        extraProps.ref = registerSyntheticCandidates
+      }
+      return React.cloneElement(child, {
+        ...extraProps,
+        className: cn('vm', 'input'),
+        intent: errors.length ? Intent.DANGER : '',
+        datafield: dataField,
+        onChange,
+      })
+})
 
     // return errortype === 'static'
     //   ? newChildren

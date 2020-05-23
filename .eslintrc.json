@@ -32,6 +32,8 @@
         "import/extensions":0,
         "no-tabs": 0,
         "no-plusplus": 0,
+        "no-unused-expressions": 0,
+        "babel/no-unused-expressions": 1,
         "no-underscore-dangle": 0,
         "react/static-property-placement": 0,
         "react/jsx-filename-extension": 0,

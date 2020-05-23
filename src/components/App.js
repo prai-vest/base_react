@@ -6,7 +6,8 @@ import React from 'react'
 import KendoFormExample from 'Components/KendoFormExample'
 import Home from 'Components/Home'
 import BPHome from 'Components/BPHome'
-import BPComponents from 'Components/BPComponents'
+import BPComponents from 'Components/BPComponents/VMSelect'
+import FormTest from 'Components/FormTest'
 import Demo from 'Components/demo'
 import './App.scss'
 
@@ -22,6 +23,7 @@ function App() {
             <li><Link to="/kendoForm">KendoFormExample</Link></li>
             <li><Link to="/bpcomponents">BP-Components</Link></li>
             <li><Link to="/blueprint">Blueprint</Link></li>
+            <li><Link to="/formtest">Form-Test</Link></li>
           </ul>
         </nav>
         <div className="container">
@@ -31,6 +33,7 @@ function App() {
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />
             <Route path="/blueprint" component={BPHome} />
+            <Route path="/formtest" component={FormTest} />
           </Switch>
         </div>
       </div>

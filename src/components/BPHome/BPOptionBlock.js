@@ -3,6 +3,7 @@ import {
   Button, Intent, HTMLSelect,
   InputGroup, Icon,
 } from '@blueprintjs/core'
+import VMSelect from 'Components/BPComponents/VMSelect'
 import Form from './Form'
 import FormField from './FormField'
 
@@ -34,7 +35,6 @@ const numericValidator = getValidateFunc([validators.required, validators.numeri
 
 export default class BPHome extends Component {
   componentDidMount() {
-    console.log('hello')
   }
 
   render() {
@@ -47,12 +47,12 @@ export default class BPHome extends Component {
           targetPercentage: '',
         }}
         >
-          <div className="form-field">
-            <label>Strategy</label>
-            <HTMLSelect
-              options={OPTIONS_STRATEGY}
-            />
-          </div>
+          <FormField
+            label="Strategy"
+            dataField="strategy"
+          >
+            <VMSelect registerForSyntheticReset />
+          </FormField>
           <FormField
             dataField="underlyingsymbol"
             errorType="tooltip"
