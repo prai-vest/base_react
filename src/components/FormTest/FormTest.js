@@ -8,9 +8,17 @@ export default class FormTest extends React.Component {
 
   }
 
+  schema = {
+    properties: {
+      // username: { type: 'string', minLength: 3, pattern: '^[a-z]+$' },
+      password: { type: 'string', minLength: 5 },
+    },
+    required: ['username'],
+  }
+
   render() {
     return (
-      <Form>
+      <Form schema={this.schema}>
         <FormField
           dataField="username"
           label="Username"

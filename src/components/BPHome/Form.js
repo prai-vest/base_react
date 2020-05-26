@@ -1,28 +1,34 @@
 import React from 'react'
 import { Button } from '@blueprintjs/core'
-
+import Ajv from 'ajv'
 import './Form.scss'
 
 /* eslint-disable class-methods-use-this */
 export default class Form extends React.PureComponent {
   static defaultProps = {
     data: {},
+    validateOnChange: true,
+    validateOnBlur: true,
+    showMultipleErrors: true,
   }
 
   syntheticResetCandidates = []
+
+  validator = Ajv({ allErrors: true })
+    .compile(this.props.schema || {})
 
   formRef = React.createRef()
 
   state = {
     data: {},
     canSubmit: true,
+    formKey: 1,
+    errors: [],
   }
 
   componentDidMount() {
-    // const { data } = this.props
-    // const newData = { ...data }
-    // this.setState({ data: newData })
     this.formRef.current.addEventListener('reset', () => {
+      this.setState({ canSubmit: true, data: {} })
       this.syntheticResetCandidates.forEach((item) => {
         if (item.reset) {
           item.reset()
@@ -66,8 +72,26 @@ export default class Form extends React.PureComponent {
     })
   }
 
-  handleSubmit = (event) => {
+  validate = async () => {
+    const { data, canSubmit } = this.state
+    const { onValidate } = this.props
+    if (!canSubmit) return false
+
+    if (onValidate) {
+      const errors = await onValidate(data)
+      if (errors.length) {
+        this.setState({
+          errors,
+        })
+        return false
+      }
+    }
+    return true
+  }
+
+  handleSubmit = async (event) => {
     event.preventDefault()
+    await this.validate()
     console.log(this.state.data)
   }
 
@@ -79,21 +103,27 @@ export default class Form extends React.PureComponent {
 
   renderForm = (children) => {
     console.log('[Form] rendered')
-    const { data: initialData } = this.props
-    const { data: currentData, errors } = this.state
+    const {
+      data: initialData, validateOnChange, validateOnBlur,
+      schema, showMultipleErrors,
+    } = this.props
+    const { errors } = this.state
     const modifiedChild = React.Children.map(children, (child) => {
       if (!child.props) return child
       const { dataField } = child.props
       if (dataField) {
-        // * Hook onChange and errors and anyOther
-        // * mayBe also value and Initial Value
-        // * Hence Form-Field becomes strictly controlled?
         return React.cloneElement(child, {
           initialValue: initialData[dataField],
-          currentValue: currentData[dataField],
+          // currentValue: currentData[dataField],
+          dataField,
+          showMultipleErrors,
           ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
-          onChange: this.fieldOnChangeHandler,
+          fieldOnChangeHandler: this.fieldOnChangeHandler,
           registerSyntheticCandidates: this.registerSyntheticCandidates,
+          schema,
+          validator: this.validator,
+          validateOnChange,
+          validateOnBlur,
           errors,
         })
       }
@@ -110,15 +140,15 @@ export default class Form extends React.PureComponent {
 
   render() {
     const { children } = this.props
+    const { canSubmit } = this.state
     return (
       <form ref={this.formRef} onSubmit={this.handleSubmit} className="vm form">
         {this.renderForm(children)}
         <div className="form-buttons">
           <Button onClick={this.test} text="Test" />
-          <Button type="submit" text="Submit" />
+          <Button type="submit" text="Submit" disabled={!canSubmit} />
         </div>
       </form>
-
     )
   }
 }

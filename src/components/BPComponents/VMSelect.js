@@ -18,7 +18,8 @@ export default class VMSelect extends React.Component {
   }
 
   componentDidMount() {
-
+    /* also needs to handle initial value */
+    /* change needs to be propagated poperly */
   }
 
   handleSelectChange = (item) => {
