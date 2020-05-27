@@ -11,7 +11,6 @@ import 'normalize.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/datetime/lib/css/blueprint-datetime.css'
-import './FormTest.scss'
 
 
 const jsDateFormatter = {
@@ -21,10 +20,6 @@ const jsDateFormatter = {
   placeholder: 'M/D/YYYY',
 };
 export default class FormTest extends React.Component {
-  state = {
-    submitted: false,
-  }
-
   schema = {
     properties: {
       username: {
@@ -35,29 +30,16 @@ export default class FormTest extends React.Component {
           pattern: 'Not the right pattern',
         },
       },
-      lastname: {
+      password: {
         type: 'string',
-        minLength: 2,
+        minLength: 5,
         messages: {
-          minLength: 'Password must have min-length of 2',
+          minLength: 'Password must have min-length of 5',
         },
       },
       birthday: { format: 'date' },
     },
-    required: ['username', 'lastname', 'birthday'],
-  }
-
-  submitHandler = () => {
-    console.log('submitHandler called')
-    this.setState({
-      submitted: true,
-    })
-  }
-
-  goBackHandler = () => {
-    this.setState({
-      submitted: false,
-    })
+    required: ['username', 'birthday'],
   }
 
   remoteValidate = (formData) => axios.post('http://localhost:3004/validate', formData)
@@ -73,47 +55,33 @@ export default class FormTest extends React.Component {
       })
 
   render() {
-    const { submitted } = this.state
     return (
-      <div className="demo-container">
-        <h2 className="title">Simple form with ui and backend validation</h2>
-        <div className="form-container">
-          {!submitted && (
-          <Form
-            schema={this.schema}
-            onValidate={this.remoteValidate}
-            onSubmit={this.submitHandler}
+      <>
+        <Form
+          schema={this.schema}
+          onValidate={this.remoteValidate}
+          onSubmit={(data) => { console.log('Submitting', data) }}
+        >
+          <FormField
+            dataField="username"
+            label="Username"
           >
-            <FormField
-              dataField="username"
-              label="Username"
-            >
-              <InputGroup />
-            </FormField>
-            <FormField
-              dataField="lastname"
-              label="Lastname"
-            >
-              <InputGroup />
-            </FormField>
-            <FormField
-              dataField="birthday"
-              label="Birthday"
-            >
-              <VMDateInput registerForSyntheticReset />
-            </FormField>
-          </Form>
-        )}
-          {
-          submitted && (
-            <h3 className="submitted-message">
-              Your form has been successfully submitted.
-            </h3>
-
-          )
-        }
-        </div>
-      </div>
+            <InputGroup />
+          </FormField>
+          <FormField
+            dataField="password"
+            label="Password"
+          >
+            <InputGroup />
+          </FormField>
+          <FormField
+            dataField="birthday"
+            label="Birthday"
+          >
+            <VMDateInput registerForSyntheticReset />
+          </FormField>
+        </Form>
+      </>
     )
   }
 }

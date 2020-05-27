@@ -7,14 +7,14 @@ const INITIAL_STATE = {
   data: {},
   canSubmit: true,
   errors: [],
+  showErrorsOverride: false,
 }
 export default class Form extends React.PureComponent {
   static defaultProps = {
     data: {},
-    validateOnChange: true,
-    validateOnBlur: true,
     showMultipleErrors: false,
     centralizedErrorHandling: true,
+    showErrorsOn: 'modified_OR_visited',
   }
 
   syntheticResetCandidates = []
@@ -67,25 +67,30 @@ export default class Form extends React.PureComponent {
     this.syntheticResetCandidates.push(ref)
   }
 
-  fieldOnChangeHandler = (event) => {
-    const { centralizedErrorHandling, validateOnChange } = this.props
-    const dataField = event.target.getAttribute('dataField')
-    const newValue = event.target.value
+  fieldOnChangeHandler = (value, dataField) => {
+    const { centralizedErrorHandling } = this.props
     const { data } = this.state
     const newData = data
-    newData[dataField] = newValue.trim()
+    newData[dataField] = value
     /* todo setPathValue here */
     this.setState({ data: newData })
-    if (centralizedErrorHandling && validateOnChange) {
+    if (centralizedErrorHandling) {
       const errors = this.validate(newData)
       this.setState({ errors, canSubmit: errors.length === 0 })
     }
   }
 
   fieldOnBlurHandler = () => {
-    const { centralizedErrorHandling, validateOnBlur } = this.props
-    const { data } = this.state
-    if (centralizedErrorHandling && validateOnBlur) {
+    const { onBlur } = this.props
+    if (onBlur) {
+      onBlur()
+    }
+  }
+
+  fieldOnFocus = () => {
+    const { centralizedErrorHandling } = this.props
+    if (centralizedErrorHandling) {
+      const { data } = this.state
       const errors = this.validate(data)
       this.setState({ errors, canSubmit: errors.length === 0 })
     }
@@ -144,24 +149,31 @@ export default class Form extends React.PureComponent {
     const { onValidate, onSubmit } = this.props
     const { data } = this.state
     const uiErrors = this.validate(data)
+    if (uiErrors.length) {
+      this.setState({ errors: uiErrors, showErrorsOverride: true })
+      return
+    }
     let additionalErrors = []
     if (onValidate) {
-      additionalErrors = await onValidate(data)
+      const remoteErrors = await onValidate(data)
+      if (remoteErrors.length) {
+        additionalErrors = remoteErrors
+      }
     }
     const errors = uiErrors.concat(additionalErrors)
     if (errors.length === 0) {
       onSubmit(data)
+    } else {
+      this.setState({ errors, canSubmit: false, showErrorsOverride: true })
     }
-    this.setState({ errors, canSubmit: true })
   }
 
   renderForm = (children) => {
     console.log('[Form] rendered')
     const {
-      centralizedErrorHandling, data: initialData, showMultipleErrors,
-      validateOnChange, validateOnBlur,
+      centralizedErrorHandling, data: initialData, showErrorsOn, showMultipleErrors,
     } = this.props
-    const { errors } = this.state
+    const { errors, showErrorsOverride } = this.state
     const modifiedChild = React.Children.map(children, (child) => {
       if (!child.props) return child
       const { dataField } = child.props
@@ -177,13 +189,14 @@ export default class Form extends React.PureComponent {
           ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           errors: fieldSpecificErrors,
           fieldOnBlurHandler: this.fieldOnBlurHandler,
+          fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
           formValidator: this.validator,
           registerSyntheticCandidates: this.registerSyntheticCandidates,
           resetErrorForField: this.resetErrorForField,
+          showErrorsOn,
+          showErrorsOverride,
           showMultipleErrors,
-          validateOnChange,
-          validateOnBlur,
         })
       }
 

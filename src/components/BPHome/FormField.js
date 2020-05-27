@@ -43,6 +43,10 @@ export default class FormField extends Component {
 
   state = {
     errors: [],
+    inFocus: false,
+    modified: false,
+    touched: false,
+    visited: false,
   }
 
   componentDidMount() {
@@ -50,9 +54,25 @@ export default class FormField extends Component {
     registerSyntheticCandidates(this)
   }
 
+
+  get showErrors() {
+    const { showErrorsOn, showErrorsOverride } = this.props
+    if (showErrorsOverride) return true
+    /* todo: memoize */
+    const testForDivider = /(_OR_|_AND_)/g.exec(showErrorsOn)
+    const keys = testForDivider ? showErrorsOn.split(RegExp.$1) : [showErrorsOn]
+    const values = keys.map((key) => this.state[key])
+    if (RegExp.$1 === '_AND_') {
+      return values.every(Boolean)
+    }
+    return values.some(Boolean)
+  }
+
   reset = () => {
     this.currentInputValue = null
-    this.setState({ errors: [] })
+    this.setState({
+      errors: [], modified: false, touched: false, visited: false,
+    })
   }
 
   setFieldSchema = () => {
@@ -71,51 +91,63 @@ export default class FormField extends Component {
   validateField = (value) => {
     this.fieldValidator(value)
     const errors = []
-    if (value === '' && this.isARequiredField) {
+    if (value === '' && value === null && this.isARequiredField) {
       errors.push('This is a required field.')
     }
     if (this.fieldValidator.errors?.length) {
       this.fieldValidator.errors.forEach((item) => {
         const { messages } = this.fieldSchema
-        errors.push(messages[item.keyword] || item.message)
+        errors.push(messages?.[item.keyword] || item.message)
       })
     }
     return errors
   }
 
-  handleInputChange = (event) => {
+  handleInputChange = (event, inputValue) => {
     const {
-      centralizedErrorHandling, dataField, ensureIfAbleToSubmit,
-      fieldOnChangeHandler, resetErrorForField, validateOnChange,
+      centralizedErrorHandling, dataField, ensureIfAbleToSubmit, initialValue,
+      fieldOnChangeHandler, resetErrorForField,
     } = this.props
+
+    const currentInputValue = event
+      ? event.target.value.trim()
+      : inputValue.trim()
+
+    if (currentInputValue !== initialValue) {
+      this.setState({ modified: true })
+    }
     // validate only if error handling is not centralized
-    if (!centralizedErrorHandling && validateOnChange) {
+    if (!centralizedErrorHandling) {
       const { isErrorsMixed } = this.state
       if (isErrorsMixed) {
         resetErrorForField(dataField)
       }
-      const { target: { value } } = event
-      this.currentInputValue = value.trim()
-      const errors = this.validateField(this.currentInputValue)
-      this.setState({ errors }, () => {
-        ensureIfAbleToSubmit()
-      })
-    }
-    fieldOnChangeHandler(event)
-  }
-
-  handleBlur = (event) => {
-    const {
-      centralizedErrorHandling, ensureIfAbleToSubmit, fieldOnBlurHandler, validateOnBlur,
-    } = this.props
-    // validate only if error handling is not centralized
-    if (!centralizedErrorHandling && validateOnBlur) {
+      this.currentInputValue = currentInputValue
       const errors = this.validateField(this.currentInputValue || '')
       this.setState({ errors }, () => {
         ensureIfAbleToSubmit()
       })
     }
-    fieldOnBlurHandler(event)
+    fieldOnChangeHandler(currentInputValue, dataField)
+  }
+
+  handleBlur = () => {
+    const { fieldOnBlurHandler } = this.props
+    fieldOnBlurHandler()
+    this.setState({
+      visited: true,
+      inFocus: false,
+    })
+  }
+
+  handleFocus = () => {
+    const { fieldOnFocus, centralizedErrorHandling, ensureIfAbleToSubmit } = this.props
+    if (!centralizedErrorHandling) {
+      const errors = this.validateField(this.currentInputValue || '')
+      this.setState({ errors }, ensureIfAbleToSubmit)
+    }
+    this.setState({ touched: true, inFocus: true })
+    fieldOnFocus()
   }
 
   renderFormField(children, fieldErrors) {
@@ -136,18 +168,21 @@ export default class FormField extends Component {
         extraProps.ref = registerSyntheticCandidates
       }
 
+      const isInvalid = fieldErrors.length && this.showErrors
+
       return React.cloneElement(child, {
         ...extraProps,
-        'aria-invalid': fieldErrors.length ? 'true' : 'false',
-        'aria-describedby': fieldErrors.length ? this.errorId : ' ',
+        'aria-invalid': isInvalid ? 'true' : 'false',
+        'aria-describedby': isInvalid ? this.errorId : ' ',
         className: cn('vm', 'input'),
-        intent: fieldErrors.length ? Intent.DANGER : '', /* Blueprint specific */
+        intent: isInvalid ? Intent.DANGER : '', /* Blueprint specific */
         datafield: dataField,
         // inputRef: this.inputRef,
         id: this.fieldId,
         defaultValue: initialValue,
         onBlur: this.handleBlur,
         onChange: this.handleInputChange,
+        onFocus: this.handleFocus,
       })
     })
 
@@ -170,13 +205,12 @@ export default class FormField extends Component {
       children, dataField, errorType, label,
     } = this.props
     const { errors } = this.state
-
     console.log(`[FormField]: ${dataField} rendered `)
     return (
       <div className="form-field">
         {label && <label htmlFor={this.fieldId}>{label}</label>}
         {this.renderFormField(children, errors)}
-        { errors.length > 0 && errorType === 'static'
+        { (errors.length > 0 && this.showErrors) && errorType === 'static'
           && (
           <div className="validation-message" role="alert" id={this.errorId}>
             {errors[0]}

@@ -1,0 +1,16 @@
+
+.demo-container {
+  width: 800px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .3);
+  h2 {
+    margin: 0;
+    padding: 12px 0 12px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, .2);
+  }
+}
+.form-container {
+  margin-top: 12px;
+  width: 400px;
+  padding: 24px;
+  min-height: 300px;
+}
