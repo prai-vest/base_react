@@ -13,9 +13,25 @@ export default class FormField extends Component {
     errors: [],
   }
 
+  static getDerivedStateFromProps({ errors, centralizedErrorHandling }, state) {
+    if (centralizedErrorHandling) {
+      return {
+        errors,
+      }
+    }
+    return {
+      errors: errors.concat(state.errors),
+      isErrorsMixed: errors.length > 0,
+    }
+  }
+
   currentInputValue = null
 
+  inputRef = React.createRef()
+
   fieldId = makeId()
+
+  errorId = makeId()
 
   fieldSchema = {}
 
@@ -32,7 +48,6 @@ export default class FormField extends Component {
   componentDidMount() {
     const { registerSyntheticCandidates } = this.props
     registerSyntheticCandidates(this)
-    // schema stuff
   }
 
   reset = () => {
@@ -41,13 +56,13 @@ export default class FormField extends Component {
   }
 
   setFieldSchema = () => {
-    const { schema, dataField } = this.props
-    this.fieldSchema = schema.properties[dataField] || {}
-    this.isARequiredField = schema.required?.includes(dataField)
+    const { dataField, formValidator } = this.props
+    const { fieldSchema, isRequired } = formValidator.getPropertySchema(dataField)
+    this.fieldSchema = fieldSchema
+    this.isARequiredField = isRequired
     this.isFieldSchemaSet = true
   }
 
-  // const isRequired =
   setFieldValidator = () => {
     this.fieldValidator = Ajv({ allErrors: true })
       .compile(this.fieldSchema)
@@ -60,19 +75,27 @@ export default class FormField extends Component {
       errors.push('This is a required field.')
     }
     if (this.fieldValidator.errors?.length) {
-      this.fieldValidator.errors.forEach((item) => errors.push(item.message))
+      this.fieldValidator.errors.forEach((item) => {
+        const { messages } = this.fieldSchema
+        errors.push(messages[item.keyword] || item.message)
+      })
     }
     return errors
   }
 
   handleInputChange = (event) => {
     const {
-      fieldOnChangeHandler, ensureIfAbleToSubmit, validateOnChange,
+      centralizedErrorHandling, dataField, ensureIfAbleToSubmit,
+      fieldOnChangeHandler, resetErrorForField, validateOnChange,
     } = this.props
-    const { target: { value } } = event
-    this.currentInputValue = value.trim()
-
-    if (validateOnChange) {
+    // validate only if error handling is not centralized
+    if (!centralizedErrorHandling && validateOnChange) {
+      const { isErrorsMixed } = this.state
+      if (isErrorsMixed) {
+        resetErrorForField(dataField)
+      }
+      const { target: { value } } = event
+      this.currentInputValue = value.trim()
       const errors = this.validateField(this.currentInputValue)
       this.setState({ errors }, () => {
         ensureIfAbleToSubmit()
@@ -81,36 +104,46 @@ export default class FormField extends Component {
     fieldOnChangeHandler(event)
   }
 
-  handleBlur = () => {
-    const { validateOnBlur, ensureIfAbleToSubmit } = this.props
-    if (validateOnBlur) {
+  handleBlur = (event) => {
+    const {
+      centralizedErrorHandling, ensureIfAbleToSubmit, fieldOnBlurHandler, validateOnBlur,
+    } = this.props
+    // validate only if error handling is not centralized
+    if (!centralizedErrorHandling && validateOnBlur) {
       const errors = this.validateField(this.currentInputValue || '')
       this.setState({ errors }, () => {
         ensureIfAbleToSubmit()
       })
     }
+    fieldOnBlurHandler(event)
   }
 
-  renderFormField(children) {
+  renderFormField(children, fieldErrors) {
     const {
-      dataField, errors, errorType, registerSyntheticCandidates, initialValue,
+      centralizedErrorHandling, dataField, errorType,
+      initialValue, registerSyntheticCandidates,
     } = this.props
 
-    if (!this.isFieldSchemaSet) {
+    if (!this.isFieldSchemaSet && !centralizedErrorHandling) {
       this.setFieldSchema()
       this.setFieldValidator()
     }
 
     const newChildren = React.Children.map(children, (child) => {
       const extraProps = {}
+      // setup non-native html inputs to act on form reset
       if (child.props.registerForSyntheticReset) {
         extraProps.ref = registerSyntheticCandidates
       }
+
       return React.cloneElement(child, {
         ...extraProps,
+        'aria-invalid': fieldErrors.length ? 'true' : 'false',
+        'aria-describedby': fieldErrors.length ? this.errorId : ' ',
         className: cn('vm', 'input'),
-        intent: errors.length ? Intent.DANGER : '',
+        intent: fieldErrors.length ? Intent.DANGER : '', /* Blueprint specific */
         datafield: dataField,
+        // inputRef: this.inputRef,
         id: this.fieldId,
         defaultValue: initialValue,
         onBlur: this.handleBlur,
@@ -122,10 +155,10 @@ export default class FormField extends Component {
       ? newChildren
       : (
         <Tooltip
-          content={errors[0]}
+          content={fieldErrors[0]}
           position={Position.TOP}
           intent="danger"
-          disabled={errors.length === 0}
+          disabled={fieldErrors.length === 0}
         >
           {newChildren}
         </Tooltip>
@@ -134,21 +167,21 @@ export default class FormField extends Component {
 
   render() {
     const {
-      children, errorType, label, dataField, showMultipleErrors,
+      children, dataField, errorType, label,
     } = this.props
     const { errors } = this.state
+
     console.log(`[FormField]: ${dataField} rendered `)
     return (
       <div className="form-field">
         {label && <label htmlFor={this.fieldId}>{label}</label>}
-        {this.renderFormField(children)}
+        {this.renderFormField(children, errors)}
         { errors.length > 0 && errorType === 'static'
           && (
-          <div className="validation-message">
-            {!showMultipleErrors ? errors[0]
-            : (
-              errors.map((error, idx) => <div key={String.fromCharCode(65 + idx)}>{error}</div>)
-            )}
+          <div className="validation-message" role="alert" id={this.errorId}>
+            {errors[0]}
+            {/* errors.map((error, idx) =>
+            <div key={String.fromCharCode(65 + idx)}>{error}</div>) */}
           </div>
         )}
       </div>
