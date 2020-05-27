@@ -17,11 +17,13 @@ export default class FormField extends Component {
     if (centralizedErrorHandling) {
       return {
         errors,
+        showErrorsOverride: state.showErrorsOverride,
       }
     }
     return {
       errors: errors.concat(state.errors),
       isErrorsMixed: errors.length > 0,
+      showErrorsOverride: state.showErrorsOverride,
     }
   }
 
@@ -32,6 +34,8 @@ export default class FormField extends Component {
   fieldId = makeId()
 
   errorId = makeId()
+
+  hintId = makeId()
 
   fieldSchema = {}
 
@@ -56,16 +60,21 @@ export default class FormField extends Component {
 
 
   get showErrors() {
-    const { showErrorsOn, showErrorsOverride } = this.props
+    const { showErrorsOn } = this.props
+    const { showErrorsOverride } = this.state
     if (showErrorsOverride) return true
+    const { errors } = this.state
     /* todo: memoize */
     const testForDivider = /(_OR_|_AND_)/g.exec(showErrorsOn)
     const keys = testForDivider ? showErrorsOn.split(RegExp.$1) : [showErrorsOn]
     const values = keys.map((key) => this.state[key])
+    let basedOnInputState
     if (RegExp.$1 === '_AND_') {
-      return values.every(Boolean)
+      basedOnInputState = values.every(Boolean)
+    } else {
+      basedOnInputState = values.some(Boolean)
     }
-    return values.some(Boolean)
+    return basedOnInputState && errors.length > 0
   }
 
   reset = () => {
@@ -121,6 +130,7 @@ export default class FormField extends Component {
       const { isErrorsMixed } = this.state
       if (isErrorsMixed) {
         resetErrorForField(dataField)
+        this.setState({ showErrorsOverride: false })
       }
       this.currentInputValue = currentInputValue
       const errors = this.validateField(this.currentInputValue || '')
@@ -153,7 +163,7 @@ export default class FormField extends Component {
   renderFormField(children, fieldErrors) {
     const {
       centralizedErrorHandling, dataField, errorType,
-      initialValue, registerSyntheticCandidates,
+      initialValue, registerSyntheticCandidates, hint,
     } = this.props
 
     if (!this.isFieldSchemaSet && !centralizedErrorHandling) {
@@ -169,11 +179,13 @@ export default class FormField extends Component {
       }
 
       const isInvalid = fieldErrors.length && this.showErrors
+      const inputDescribedBy = isInvalid ? this.errorId
+        : hint ? this.hintId : ' '
 
       return React.cloneElement(child, {
         ...extraProps,
         'aria-invalid': isInvalid ? 'true' : 'false',
-        'aria-describedby': isInvalid ? this.errorId : ' ',
+        'aria-describedby': inputDescribedBy,
         className: cn('vm', 'input'),
         intent: isInvalid ? Intent.DANGER : '', /* Blueprint specific */
         datafield: dataField,
@@ -202,7 +214,7 @@ export default class FormField extends Component {
 
   render() {
     const {
-      children, dataField, errorType, label,
+      children, dataField, errorType, label, hint,
     } = this.props
     const { errors } = this.state
     console.log(`[FormField]: ${dataField} rendered `)
@@ -210,13 +222,18 @@ export default class FormField extends Component {
       <div className="form-field">
         {label && <label htmlFor={this.fieldId}>{label}</label>}
         {this.renderFormField(children, errors)}
-        { (errors.length > 0 && this.showErrors) && errorType === 'static'
-          && (
-          <div className="validation-message" role="alert" id={this.errorId}>
-            {errors[0]}
-            {/* errors.map((error, idx) =>
-            <div key={String.fromCharCode(65 + idx)}>{error}</div>) */}
-          </div>
+        { (this.showErrors && errorType === 'static')
+          ? (
+            <div className="validation-message" role="alert" id={this.errorId}>
+              {errors[0]}
+              {/* errors.map((error, idx) =>
+              <div key={String.fromCharCode(65 + idx)}>{error}</div>) */}
+            </div>
+            )
+          : null
+        }
+        {hint && !this.showErrors && (
+          <div className="input-hint" id={this.hintId}>{`Hint: ${hint}`}</div>
         )}
       </div>
     )

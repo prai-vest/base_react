@@ -39,8 +39,15 @@ export default class FormTest extends React.Component {
         type: 'string',
         minLength: 2,
         messages: {
-          minLength: 'Password must have min-length of 2',
+          minLength: 'Lastname must have min-length of 2',
         },
+      },
+      password: {
+        type: 'string',
+        pattern: '^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]+$',
+        messages: {
+            pattern: 'Invalid password',
+          },
       },
       birthday: { format: 'date' },
     },
@@ -87,12 +94,20 @@ export default class FormTest extends React.Component {
             <FormField
               dataField="username"
               label="Username"
+              hint="Only prai will validate successfully in backend validation part"
             >
               <InputGroup />
             </FormField>
             <FormField
               dataField="lastname"
               label="Lastname"
+            >
+              <InputGroup />
+            </FormField>
+            <FormField
+              dataField="password"
+              label="Password"
+              hint="At least one letter, one capital letter and one small letter and no special characters"
             >
               <InputGroup />
             </FormField>
@@ -107,7 +122,7 @@ export default class FormTest extends React.Component {
           {
           submitted && (
             <h3 className="submitted-message">
-              Your form has been successfully submitted.
+              Your form has been successfully submitted. Refresh to start over.
             </h3>
 
           )

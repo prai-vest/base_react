@@ -57,13 +57,14 @@ export default class VMDateInput extends React.Component {
   }
 
   render() {
-    const { datafield, id } = this.props
+    const { datafield, id, intent } = this.props
     const { value } = this.state
     return (
       <DateInput
         inputProps={{
           id,
           inputRef: this.inputRef,
+          intent,
           datafield,
           onBlur: this.onBlurHandler,
           onFocus: this.onFocusHandler,
