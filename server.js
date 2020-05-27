@@ -1,4 +1,6 @@
 const express = require('express')
+const fallback = require('express-history-api-fallback')
+const path = require('path')
 const cors = require('cors')
 
 const PORT = 3004
@@ -7,6 +9,16 @@ app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+app.use('/', express.static('dist', {
+  dotfiles: 'ignore',
+  etag: false,
+  extensions: ['js', 'map', 'html', 'ttf'],
+  maxAge: 0,
+  redirect: false,
+}))
+
+app.use(fallback('index.html', { root: path.resolve(__dirname, 'dist') }))
 
 app.get('/greet', (req, res) => {
   res.send('hello')
