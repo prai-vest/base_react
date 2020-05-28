@@ -16,7 +16,7 @@ function App() {
   return (
     <Router>
       <div className="app-root">
-        <nav>
+        {/* <nav>
           <ul>
             <li><Link to="/">Main</Link></li>
             <li><Link to="/components">Components</Link></li>
@@ -25,15 +25,15 @@ function App() {
             <li><Link to="/blueprint">Blueprint</Link></li>
             <li><Link to="/formtest">Form-Test</Link></li>
           </ul>
-        </nav>
+        </nav> */}
         <div className="container">
           <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/components" component={Demo} />
+            <Route exact path="/" component={FormTest} />
+            {/* <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />
             <Route path="/blueprint" component={BPHome} />
-            <Route path="/formtest" component={FormTest} />
+            <Route path="/formtest" component={FormTest} /> */}
           </Switch>
         </div>
       </div>

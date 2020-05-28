@@ -3,56 +3,41 @@ import { Button } from '@blueprintjs/core'
 import Validator from './Validator'
 import './Form.scss'
 
+// centralizedErrorHandling: true,
 const INITIAL_STATE = {
   data: {},
   canSubmit: true,
   errors: [],
-  showErrorsOverride: false,
+  showErrorsOn(state) {
+    return state.modified || state.visited
+  },
 }
 export default class Form extends React.PureComponent {
   static defaultProps = {
-    data: {},
     showMultipleErrors: false,
-    centralizedErrorHandling: true,
-    showErrorsOn: 'modified_OR_visited',
   }
 
-  syntheticResetCandidates = []
-
   // eslint-disable-next-line
-  validator = new Validator(this.props.schema)
-
-  formRef = React.createRef()
-
-  state = { ...INITIAL_STATE }
+  constructor(props) {
+    super(props)
+    const { schema, data } = this.props
+    this.validator = new Validator(schema, data)
+    const { validateFn, defaults } = this.validator
+    const defaultData = data || defaults
+    this.defaultData = defaultData
+    this.validateFn = validateFn
+    this.state = {
+      ...INITIAL_STATE,
+      data: this.defaultData,
+    }
+  }
 
   componentDidMount() {
-    this.formRef.current.addEventListener('reset', this.resetForm)
+    console.log(this.state)
   }
 
   resetForm = () => {
     this.setState({ ...INITIAL_STATE })
-    this.syntheticResetCandidates.forEach((item) => {
-      if (item.reset) {
-        item.reset()
-      }
-    })
-  }
-
-  // when doing validation individually in formfields need to query
-  // all other fields to check if the form is submittable or not
-  ensureIfAbleToSubmit = () => {
-    const { centralizedErrorHandling } = this.props
-    if (centralizedErrorHandling) {
-      console.log('This shouldn\'t be firing when error-handling is centralized')
-    }
-    const errRef = this.syntheticResetCandidates
-      .find((item) => item.state && item.state.errors && item.state.errors.length)
-    if (errRef) {
-      this.disableSubmit()
-    } else {
-      this.enableSubmit()
-    }
   }
 
   enableSubmit = () => {
@@ -63,48 +48,38 @@ export default class Form extends React.PureComponent {
     this.setState({ canSubmit: false })
   }
 
-  registerSyntheticCandidates = (ref) => {
-    this.syntheticResetCandidates.push(ref)
-  }
-
   fieldOnChangeHandler = (value, dataField) => {
-    const { centralizedErrorHandling } = this.props
+    // const { centralizedErrorHandling } = this.props
     const { data } = this.state
     const newData = data
     newData[dataField] = value
-    /* todo setPathValue here */
     this.setState({ data: newData })
-    if (centralizedErrorHandling) {
-      const errors = this.validate(newData)
-      this.setState({ errors, canSubmit: errors.length === 0 })
-    }
-  }
-
-  fieldOnBlurHandler = () => {
-    const { onBlur } = this.props
-    if (onBlur) {
-      onBlur()
-    }
+    console.log(this.state.data)
+    console.log(this.defaultData)
+    // if (centralizedErrorHandling) {
+    const errors = this.validate()
+    this.setState({ errors, canSubmit: errors.length === 0 })
+    // }
   }
 
   fieldOnFocus = () => {
-    const { centralizedErrorHandling } = this.props
-    if (centralizedErrorHandling) {
-      const { data } = this.state
-      const errors = this.validate(data)
-      this.setState({ errors, canSubmit: errors.length === 0 })
-    }
+    // const { centralizedErrorHandling } = this.props
+    // if (centralizedErrorHandling) {
+    // const { data } = this.state
+    // const errors = this.validate(data)
+    // this.setState({ errors, canSubmit: errors.length === 0 })
+    // }
   }
 
-  validate = (data) => {
+  validate = () => {
     const { schema } = this.props
+    const { data } = this.state
     const errors = []
     const requiredErrors = []
-    const { validateFn } = this.validator
-    validateFn(data)
-    if (validateFn.errors?.length) {
+    this.validateFn(data)
+    if (this.validateFn.errors?.length) {
       // separate required specific errors
-      validateFn.errors.forEach((item) => {
+      this.validateFn.errors.forEach((item) => {
         if (item.keyword === 'required') {
           requiredErrors.push(item)
         } else {
@@ -135,45 +110,32 @@ export default class Form extends React.PureComponent {
     return errors
   }
 
-  resetErrorForField = (dataField) => {
-    const { errors } = this.state
-    const filteredErrors = errors.filter(({ dataPath }) => dataPath !== `.${dataField}`)
-    this.setState({
-      errors: filteredErrors,
-    })
-  }
-
   handleSubmit = async (event) => {
     event.preventDefault()
     this.setState({ canSubmit: false })
-    const { onValidate, onSubmit } = this.props
+    const { onSubmit } = this.props
     const { data } = this.state
-    const uiErrors = this.validate(data)
+    const uiErrors = this.validate()
     if (uiErrors.length) {
-      this.setState({ errors: uiErrors, showErrorsOverride: true })
+      this.setState({ errors: uiErrors, showErrorsOn: () => true })
       return
     }
-    let additionalErrors = []
-    if (onValidate) {
-      const remoteErrors = await onValidate(data)
-      if (remoteErrors.length) {
-        additionalErrors = remoteErrors
-      }
-    }
-    const errors = uiErrors.concat(additionalErrors)
-    if (errors.length === 0) {
-      onSubmit(data)
-    } else {
-      this.setState({ errors, canSubmit: false, showErrorsOverride: true })
-    }
+
+    // const errors = uiErrors.concat(additionalErrors)
+    // if (errors.length === 0) {
+    onSubmit(data)
+    // } else {
+      // this.setState({ errors, canSubmit: false, showErrorsOverride: true })
+    // }
   }
 
   renderForm = (children) => {
     console.log('[Form] rendered')
+    console.log(this.state)
     const {
-      centralizedErrorHandling, data: initialData, showErrorsOn, showMultipleErrors,
+      showMultipleErrors,
     } = this.props
-    const { errors, showErrorsOverride } = this.state
+    const { data, errors, showErrorsOn } = this.state
     const modifiedChild = React.Children.map(children, (child) => {
       if (!child.props) return child
       const { dataField } = child.props
@@ -183,19 +145,19 @@ export default class Form extends React.PureComponent {
           .map((errorObj) => errorObj.message)
 
         return React.cloneElement(child, {
-          initialValue: initialData[dataField],
-          centralizedErrorHandling,
+          initialValue: this.defaultData[dataField],
+          value: data[dataField],
+          // centralizedErrorHandling,
           dataField,
-          ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
+          // ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           errors: fieldSpecificErrors,
-          fieldOnBlurHandler: this.fieldOnBlurHandler,
-          fieldOnFocus: this.fieldOnFocus,
+          // fieldOnBlurHandler: this.fieldOnBlurHandler,
+          // fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
-          formValidator: this.validator,
-          registerSyntheticCandidates: this.registerSyntheticCandidates,
-          resetErrorForField: this.resetErrorForField,
+          // registerSyntheticCandidates: this.registerSyntheticCandidates,
+          // resetErrorForField: this.resetErrorForField,
           showErrorsOn,
-          showErrorsOverride,
+          // showErrorsOverride,
           showMultipleErrors,
         })
       }

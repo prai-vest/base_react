@@ -17,7 +17,7 @@ const jsDateFormatter = {
 
 export default class VMDateInput extends React.Component {
   state = {
-    value: null,
+    value: this.props.value,
   }
 
   inputRef = React.createRef()
@@ -27,10 +27,14 @@ export default class VMDateInput extends React.Component {
   onChangeHandler = (value) => {
     const { onChange } = this.props
 
-    this.setState({
-      value,
-    })
-    onChange(null, jsDateFormatter.formatDate(value) || '')
+    // this.setState({
+    //   value,
+    // })
+
+    if (!/[^0-9-/]/.test(value)) {
+
+    }
+    // onChange(jsDateFormatter.formatDate(value) || '')
   }
 
   onFocusHandler = () => {
@@ -52,11 +56,12 @@ export default class VMDateInput extends React.Component {
 
   reset = () => {
     this.setState({
-      value: null,
+      value: '',
     })
   }
 
   render() {
+    console.log(this.props)
     const { datafield, id } = this.props
     const { value } = this.state
     return (

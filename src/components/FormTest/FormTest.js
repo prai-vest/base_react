@@ -42,7 +42,7 @@ export default class FormTest extends React.Component {
           minLength: 'Password must have min-length of 2',
         },
       },
-      birthday: { format: 'date' },
+      birthday: { format: 'date', default: new Date() },
     },
     required: ['username', 'lastname', 'birthday'],
   }
@@ -99,6 +99,7 @@ export default class FormTest extends React.Component {
             <FormField
               dataField="birthday"
               label="Birthday"
+              dataGrabber={(i) => i}
             >
               <VMDateInput registerForSyntheticReset />
             </FormField>
