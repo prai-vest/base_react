@@ -81,7 +81,7 @@ export default class FormTest extends React.Component {
           {!submitted && (
           <Form
             schema={this.schema}
-            onValidate={this.remoteValidate}
+            remoteValidate={this.remoteValidate}
             onSubmit={this.submitHandler}
           >
             <FormField

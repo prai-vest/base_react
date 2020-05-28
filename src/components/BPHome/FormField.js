@@ -29,7 +29,7 @@ export default class FormField extends Component {
 
   get showErrors() {
     const { showErrorsOn, errors } = this.props
-    return showErrorsOn(this.state) && errors.length
+    return showErrorsOn(this.state) && errors.length > 0
   }
 
   handleInputChange = (onChangeArg) => {
@@ -49,9 +49,8 @@ export default class FormField extends Component {
   }
 
   handleBlur = () => {
-    // const { fieldOnChangeHandler, dataField } = this.props
-    // fieldOnBlurHandler()
-    console.log('currentInputValue', this.currentInputValue)
+    const { fieldOnBlurHandler } = this.props
+    fieldOnBlurHandler()
     this.setState({
       visited: true,
       inFocus: false,
@@ -127,7 +126,7 @@ export default class FormField extends Component {
       <div className="form-field">
         {label && <label htmlFor={this.fieldId}>{label}</label>}
         {this.renderFormField(children, errors)}
-        { (errors.length > 0 && this.showErrors) && errorType === 'static'
+        { this.showErrors && errorType === 'static'
           && (
           <div className="validation-message" role="alert" id={this.errorId}>
             {errors[0]}

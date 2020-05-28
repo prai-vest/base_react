@@ -27,14 +27,14 @@ export default class VMDateInput extends React.Component {
   onChangeHandler = (value) => {
     const { onChange } = this.props
 
-    // this.setState({
-    //   value,
-    // })
+    this.setState({
+      value,
+    })
 
-    if (!/[^0-9-/]/.test(value)) {
+    // if (!/[^0-9-/]/.test(value)) {
 
-    }
-    // onChange(jsDateFormatter.formatDate(value) || '')
+    // }
+    onChange(jsDateFormatter.formatDate(value) || '')
   }
 
   onFocusHandler = () => {
@@ -61,7 +61,6 @@ export default class VMDateInput extends React.Component {
   }
 
   render() {
-    console.log(this.props)
     const { datafield, id } = this.props
     const { value } = this.state
     return (

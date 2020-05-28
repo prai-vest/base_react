@@ -14,6 +14,7 @@ const INITIAL_STATE = {
 }
 export default class Form extends React.PureComponent {
   static defaultProps = {
+    onValidate: (a) => a,
     showMultipleErrors: false,
   }
 
@@ -23,7 +24,7 @@ export default class Form extends React.PureComponent {
     const { schema, data } = this.props
     this.validator = new Validator(schema, data)
     const { validateFn, defaults } = this.validator
-    const defaultData = data || defaults
+    const defaultData = { ...defaults, ...data }
     this.defaultData = defaultData
     this.validateFn = validateFn
     this.state = {
@@ -33,7 +34,7 @@ export default class Form extends React.PureComponent {
   }
 
   componentDidMount() {
-    console.log(this.state)
+    // console.log(this.state)
   }
 
   resetForm = () => {
@@ -54,8 +55,6 @@ export default class Form extends React.PureComponent {
     const newData = data
     newData[dataField] = value
     this.setState({ data: newData })
-    console.log(this.state.data)
-    console.log(this.defaultData)
     // if (centralizedErrorHandling) {
     const errors = this.validate()
     this.setState({ errors, canSubmit: errors.length === 0 })
@@ -71,8 +70,13 @@ export default class Form extends React.PureComponent {
     // }
   }
 
+  fieldOnBlurHandler = () => {
+    const errors = this.validate()
+    this.setState({ errors, canSubmit: errors.length === 0 })
+  }
+
   validate = () => {
-    const { schema } = this.props
+    const { schema, onValidate } = this.props
     const { data } = this.state
     const errors = []
     const requiredErrors = []
@@ -107,13 +111,14 @@ export default class Form extends React.PureComponent {
         }
       }
     })
-    return errors
+
+    return onValidate(errors)
   }
 
   handleSubmit = async (event) => {
     event.preventDefault()
     this.setState({ canSubmit: false })
-    const { onSubmit } = this.props
+    const { onSubmit, remoteValidate } = this.props
     const { data } = this.state
     const uiErrors = this.validate()
     if (uiErrors.length) {
@@ -121,17 +126,21 @@ export default class Form extends React.PureComponent {
       return
     }
 
-    // const errors = uiErrors.concat(additionalErrors)
-    // if (errors.length === 0) {
-    onSubmit(data)
-    // } else {
-      // this.setState({ errors, canSubmit: false, showErrorsOverride: true })
-    // }
+    let remoteErrors = []
+    if (remoteValidate) {
+      remoteErrors = await remoteValidate(data)
+    }
+    const errors = uiErrors.concat(remoteErrors)
+
+    if (errors.length === 0) {
+      onSubmit(data)
+    } else {
+      this.setState({ errors, canSubmit: false })
+    }
   }
 
   renderForm = (children) => {
     console.log('[Form] rendered')
-    console.log(this.state)
     const {
       showMultipleErrors,
     } = this.props
@@ -151,7 +160,7 @@ export default class Form extends React.PureComponent {
           dataField,
           // ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           errors: fieldSpecificErrors,
-          // fieldOnBlurHandler: this.fieldOnBlurHandler,
+          fieldOnBlurHandler: this.fieldOnBlurHandler,
           // fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
           // registerSyntheticCandidates: this.registerSyntheticCandidates,
