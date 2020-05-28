@@ -1,0 +1,37 @@
+.vm.v-accordion {
+  border: 1px solid rgba(0,0,0,0.08);
+  box-sizing: border-box;
+  outline: 0;
+
+  .accordion-item {
+    .ac-link {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+
+      .v-caret {
+        margin-left: auto;
+      }
+    }
+
+    & + .accordion-item {
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+  }
+
+  .accordion-group {
+    & > .accordion-item {
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+  }
+
+  & > .accordion-item {
+    & > .ac-header {
+      padding: 8px
+    }
+  }
+
+  // .accordion-item + .accordion-item {
+  //   border-top: 1px solid rgba(0,0,0,0.08);
+  // }
+}

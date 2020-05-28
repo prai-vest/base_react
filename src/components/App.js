@@ -7,7 +7,8 @@ import KendoFormExample from 'Components/KendoFormExample'
 import Home from 'Components/Home'
 import BPHome from 'Components/BPHome'
 import BPComponents from 'Components/BPComponents/VMSelect'
-import FormTest from 'Components/FormTest'
+import FormTest from 'Components/TestPages/FormTest'
+import AccordionTest from 'Components/TestPages/AccordionTest'
 import Demo from 'Components/demo'
 import './App.scss'
 
@@ -28,7 +29,8 @@ function App() {
         </nav> */}
         <div className="container">
           <Switch>
-            <Route exact path="/" component={FormTest} />
+            {/* <Route exact path="/" component={FormTest} /> */}
+            <Route exact path="/" component={AccordionTest} />
             {/* <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />
