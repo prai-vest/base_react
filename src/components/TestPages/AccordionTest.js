@@ -8,11 +8,19 @@ export default function AccordionTest() {
       <h2>Accordion Vestmark</h2>
       <div className="accordion-wrapper" style={{ width: '500px' }}>
         <Accordion>
-          <AccordionItem title="Projects">
-            <AccordionItem title="New Business Plan" />
+          <AccordionItem expanded title="Projects">
+            <AccordionItem title="New Business Plan">
+              <AccordionItem title="New Business Plan" />
+              <AccordionItem title="New Business Plan" />
+            </AccordionItem>
             <AccordionItem title="Sales Forecasts" />
             <AccordionItem title="Sales Reports" />
           </AccordionItem>
+
+          <AccordionItem title="Inputs">
+            <input type="text" />
+          </AccordionItem>
+
           <AccordionItem title="Programs">
             <AccordionItem title="Sunday" />
             <AccordionItem title="Monday" />
