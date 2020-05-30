@@ -18,15 +18,20 @@ export default class AccordionItem extends React.Component {
     }
   }
 
-  togglePanel = () => new Promise((resolve) => {
-    this.setState((state) => ({ selected: true, expanded: !state.expanded }),
+  togglePanel = (selected = true) => new Promise((resolve) => {
+    this.setState((state) => ({ selected, expanded: !state.expanded }),
       () => {
-        resolve(true)
+        const { expanded } = this.state
+        resolve(expanded)
       })
   })
 
   deselectPanel = () => {
     this.setState({ selected: false })
+  }
+
+  unexpandPanel = () => {
+    this.setState({ expanded: false })
   }
 
   setFocus = (value) => {

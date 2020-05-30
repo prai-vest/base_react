@@ -21,6 +21,10 @@ function flattenChildPanels(panel, store = []) {
 }
 
 export default class Accordion extends React.Component {
+  static defaultProps = {
+    accordionMode: 'single', // or multi
+  }
+
   state = {
     activePanelId: '',
     focused: false,
@@ -95,6 +99,20 @@ export default class Accordion extends React.Component {
   }
 
   panelHeadClickHandler = async (panelInstance) => {
+    const { accordionMode } = this.props
+    // if accordion mode is single
+    if (accordionMode === 'single') {
+      // get all other panels on same depth and deselect/unexpand them
+      const sameDepthPanels = this.flattenedPanelsStore.filter(
+        (panel) => panel.props.depth === panelInstance.props.depth
+          && panel !== panelInstance,
+      )
+      sameDepthPanels.forEach((panel) => {
+        panel.deselectPanel()
+        panel.unexpandPanel()
+      })
+    }
+
     if (panelInstance !== this.selectedPanel) {
       if (this.selectedPanel) {
         this.selectedPanel.deselectPanel()
