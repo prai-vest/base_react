@@ -17,7 +17,7 @@ const jsDateFormatter = {
 
 export default class VMDateInput extends React.Component {
   state = {
-    value: this.props.value,
+    value: this.props.value || null,
   }
 
   inputRef = React.createRef()
@@ -55,18 +55,20 @@ export default class VMDateInput extends React.Component {
   }
 
   reset = () => {
+    console.log('reset called')
     this.setState({
-      value: '',
+      value: null,
     })
   }
 
   render() {
-    const { datafield, id } = this.props
+    const { datafield, id, intent } = this.props
     const { value } = this.state
     return (
       <DateInput
         inputProps={{
           id,
+          intent,
           inputRef: this.inputRef,
           datafield,
           onBlur: this.onBlurHandler,

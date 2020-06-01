@@ -12,6 +12,16 @@ html {
   box-sizing: inherit;
 }
 
+.bp3-navbar {
+  .bp3-button.is-active {
+    background: #d4ebec;
+
+    &:hover {
+      background: #b7dbdc;
+    }
+  }
+}
+
 a {
   cursor: pointer;
   text-decoration: none;
@@ -23,6 +33,7 @@ a {
 
 .container {
   margin: 0 32px;
+  padding-top: 10px;
 }
 
 .app-root {

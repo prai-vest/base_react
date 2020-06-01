@@ -18,6 +18,8 @@ export default class Form extends React.PureComponent {
     showMultipleErrors: false,
   }
 
+  syntheticResetCandidates = []
+
   // eslint-disable-next-line
   constructor(props) {
     super(props)
@@ -34,11 +36,21 @@ export default class Form extends React.PureComponent {
   }
 
   componentDidMount() {
-    // console.log(this.state)
   }
 
   resetForm = () => {
     this.setState({ ...INITIAL_STATE })
+    this.syntheticResetCandidates.forEach((item) => {
+      if (item.reset) {
+        item.reset()
+      }
+    })
+  }
+
+  registerSyntheticResetCandidates = (ref) => {
+    if (ref) {
+      this.syntheticResetCandidates.push(ref)
+    }
   }
 
   enableSubmit = () => {
@@ -163,7 +175,7 @@ export default class Form extends React.PureComponent {
           fieldOnBlurHandler: this.fieldOnBlurHandler,
           // fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
-          // registerSyntheticCandidates: this.registerSyntheticCandidates,
+          registerSyntheticResetCandidates: this.registerSyntheticResetCandidates,
           // resetErrorForField: this.resetErrorForField,
           showErrorsOn,
           // showErrorsOverride,
@@ -185,7 +197,7 @@ export default class Form extends React.PureComponent {
     const { children, renderButtons } = this.props
     const { canSubmit } = this.state
     return (
-      <form ref={this.formRef} onSubmit={this.handleSubmit} className="vm form">
+      <form ref={this.formRef} onSubmit={this.handleSubmit} onReset={this.resetForm} className="vm form">
         {this.renderForm(children)}
         {!renderButtons && (
           <div className="form-buttons">

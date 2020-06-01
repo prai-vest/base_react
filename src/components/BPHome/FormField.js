@@ -6,6 +6,14 @@ import cn from 'classnames'
 import makeId from 'Utils/makeId'
 import './FormField.scss'
 
+const INITIAL_STATE = {
+  errors: [],
+  inFocus: false,
+  modified: false,
+  touched: false,
+  visited: false,
+}
+
 export default class FormField extends Component {
   static defaultProps = {
     dataGrabber: (event) => event.target.value?.trim(),
@@ -19,17 +27,22 @@ export default class FormField extends Component {
 
   errorId = makeId()
 
-  state = {
-    errors: [],
-    inFocus: false,
-    modified: false,
-    touched: false,
-    visited: false,
+  hintId = makeId()
+
+  state = { ...INITIAL_STATE }
+
+  componentDidMount() {
+    const { registerSyntheticResetCandidates } = this.props
+    registerSyntheticResetCandidates(this)
   }
 
   get showErrors() {
     const { showErrorsOn, errors } = this.props
     return showErrorsOn(this.state) && errors.length > 0
+  }
+
+  reset = () => {
+    this.setState({ ...INITIAL_STATE })
   }
 
   handleInputChange = (onChangeArg) => {
@@ -39,8 +52,6 @@ export default class FormField extends Component {
 
     const currentInputValue = dataGrabber(onChangeArg)
     this.currentInputValue = currentInputValue
-    //   ? event.target.value.trim()
-    //   : inputValue.trim()
 
     if (currentInputValue !== initialValue) {
       this.setState({ modified: true })
@@ -69,8 +80,8 @@ export default class FormField extends Component {
 
   renderFormField(children, fieldErrors) {
     const {
-      centralizedErrorHandling, dataField, errorType,
-      initialValue, registerSyntheticCandidates, value,
+      dataField, errorType,
+      registerSyntheticResetCandidates, value, hint,
     } = this.props
 
     // if (!this.isFieldSchemaSet && !centralizedErrorHandling) {
@@ -81,14 +92,21 @@ export default class FormField extends Component {
     const newChildren = React.Children.map(children, (child) => {
       const extraProps = {}
       // setup non-native html inputs to act on form reset
-      // if (child.props.registerForSyntheticReset) {
-      //   extraProps.ref = registerSyntheticCandidates
-      // }
+      if (child.props.registerForSyntheticReset) {
+        extraProps.ref = registerSyntheticResetCandidates
+      }
+
+      let inputDescribedBy = ''
+      if (this.showErrors) {
+        inputDescribedBy = this.errorId
+      } else if (hint) {
+        inputDescribedBy = this.hintId
+      }
 
       return React.cloneElement(child, {
         ...extraProps,
         'aria-invalid': this.showErrors ? 'true' : 'false',
-        'aria-describedby': this.showErrors ? this.errorId : ' ',
+        'aria-describedby': inputDescribedBy,
         className: cn('vm', 'input'),
         intent: this.showErrors ? Intent.DANGER : '', /* Blueprint specific */
         datafield: dataField,
@@ -118,7 +136,7 @@ export default class FormField extends Component {
 
   render() {
     const {
-      children, dataField, errorType, label, errors,
+      children, dataField, errorType, label, errors, hint,
     } = this.props
     // const { errors } = this.state
     console.log(`[FormField]: ${dataField} rendered `)
@@ -133,6 +151,9 @@ export default class FormField extends Component {
             {/* errors.map((error, idx) =>
             <div key={String.fromCharCode(65 + idx)}>{error}</div>) */}
           </div>
+        )}
+        { hint && !this.showErrors && (
+          <div className="input-hint" id={this.hintId}>{`Hint: ${hint}`}</div>
         )}
       </div>
     )
