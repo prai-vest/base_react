@@ -14,12 +14,6 @@ import '@blueprintjs/datetime/lib/css/blueprint-datetime.css'
 import './FormTest.scss'
 
 
-const jsDateFormatter = {
-  // note that the native implementation of Date functions differs between browsers
-  formatDate: (date) => date.toLocaleDateString(),
-  parseDate: (str) => new Date(str),
-  placeholder: 'M/D/YYYY',
-};
 export default class FormTest extends React.Component {
   state = {
     submitted: false,
@@ -42,9 +36,16 @@ export default class FormTest extends React.Component {
           minLength: 'Password must have min-length of 2',
         },
       },
-      birthday: { format: 'date', default: new Date() },
+      password: {
+        type: 'string',
+        pattern: '^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]+$',
+        messages: {
+          pattern: 'Needs one small, one capital letter and a number (no special characters)',
+        },
+      },
+      email: { format: 'email' },
     },
-    required: ['username', 'lastname', 'birthday'],
+    required: ['username', 'lastname', 'password', 'email'],
   }
 
   submitHandler = () => {
@@ -63,7 +64,7 @@ export default class FormTest extends React.Component {
   remoteValidate = (formData) => axios.post('http://localhost:3004/validate', formData)
       .then(({ data }) => {
         if (data.code === 0) {
-          return true
+          return []
         }
         const { errors } = data
         return Object.keys(errors).map((dataField) => ({
@@ -87,6 +88,7 @@ export default class FormTest extends React.Component {
             <FormField
               dataField="username"
               label="Username"
+              hint="Only prai will validate successfully in backend validation part"
             >
               <InputGroup />
             </FormField>
@@ -96,19 +98,36 @@ export default class FormTest extends React.Component {
             >
               <InputGroup />
             </FormField>
+
             <FormField
+              dataField="password"
+              label="Password"
+              hint="At least one capital + one small letter and a number"
+            >
+              <InputGroup />
+            </FormField>
+
+            <FormField
+              dataField="email"
+              label="Email Address"
+            >
+              <InputGroup />
+            </FormField>
+
+            {/* <FormField
               dataField="birthday"
               label="Birthday"
               dataGrabber={(i) => i}
             >
               <VMDateInput registerForSyntheticReset />
-            </FormField>
+            </FormField> */}
           </Form>
         )}
           {
           submitted && (
             <h3 className="submitted-message">
               Your form has been successfully submitted.
+              Refresh the page to restart.
             </h3>
 
           )

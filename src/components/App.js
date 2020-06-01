@@ -2,7 +2,13 @@
 import {
   BrowserRouter as Router, Route, Switch, Link,
 } from 'react-router-dom'
-import React from 'react'
+// import { createBrowserHistory } from 'history'
+import {
+  Navbar, NavbarGroup, NavbarHeading, NavbarDivider,
+  Alignment, Classes, Button,
+} from '@blueprintjs/core'
+import React, { useState, useEffect, useCallback } from 'react'
+import cn from 'classnames'
 import KendoFormExample from 'Components/KendoFormExample'
 import Home from 'Components/Home'
 import BPHome from 'Components/BPHome'
@@ -12,6 +18,11 @@ import AccordionTest from 'Components/TestPages/AccordionTest'
 import Demo from 'Components/demo'
 import './App.scss'
 
+// function compareHref(to) {
+//   return function compare(value) {
+//     return value === to
+//   }
+// }
 
 function App() {
   return (
@@ -27,10 +38,24 @@ function App() {
             <li><Link to="/formtest">Form-Test</Link></li>
           </ul>
         </nav> */}
+        <Navbar>
+          <NavbarGroup align={Alignment.LEFT}>
+            <NavbarHeading>DEMO</NavbarHeading>
+            <NavbarDivider />
+
+            <Link to="/">
+              <Button className={cn(Classes.MINIMAL)} icon="data-lineage" text="Accordion" />
+            </Link>
+            <Link to="/form">
+              <Button className={cn(Classes.MINIMAL)} icon="remove-row-bottom" text="Form" />
+            </Link>
+
+          </NavbarGroup>
+        </Navbar>
         <div className="container">
           <Switch>
-            {/* <Route exact path="/" component={FormTest} /> */}
-            <Route exact path="/" component={FormTest} />
+            <Route exact path="/" component={AccordionTest} />
+            <Route exact path="/form" component={FormTest} />
             {/* <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />

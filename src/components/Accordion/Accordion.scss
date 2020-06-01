@@ -2,9 +2,10 @@ $selected: #ff6358;
 $selected-hover: #eb5b51;
 $regular-hover: #e2e2e2;
 $head-hover: #ebebeb;
+$accordion-border: rgba(0,0,0,0.2);
 
 .vm.v-accordion {
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid $accordion-border;
   box-sizing: border-box;
   outline: 0;
 
@@ -62,13 +63,13 @@ $head-hover: #ebebeb;
     }
 
     & + .accordion-item {
-      border-top: 1px solid rgba(0,0,0,0.08);
+      border-top: 1px solid $accordion-border;
     }
   }
 
   .accordion-group {
     & > .accordion-item {
-      border-top: 1px solid rgba(0,0,0,0.08);
+      border-top: 1px solid $accordion-border;
     }
   }
 
