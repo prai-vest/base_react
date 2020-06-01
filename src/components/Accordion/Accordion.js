@@ -30,6 +30,8 @@ export default class Accordion extends React.Component {
     focused: false,
   }
 
+  accordionRef = React.createRef()
+
   childPanels = []
 
   flattenedPanelsStore = []
@@ -84,8 +86,6 @@ export default class Accordion extends React.Component {
   }
 
   handleKeyPress = (event) => {
-    console.log(event)
-    console.log(event.currentTarget)
     switch (event.keyCode) {
       case KEY_CODES.down:
         this.focusPanelByIndex(this.focusIndex + 1)
@@ -141,10 +141,6 @@ export default class Accordion extends React.Component {
       })
     })
 
-  test = () => {
-    console.log(this.childPanels)
-  }
-
   render() {
     const { children } = this.props
     const { focused, activePanelId } = this.state
@@ -159,6 +155,7 @@ export default class Accordion extends React.Component {
         {
           ...(activePanelId && { 'aria-activedescendant': activePanelId })
         }
+        ref={this.accordionRef}
       >
         { this.renderPanels(children) }
       </div>

@@ -1,16 +1,33 @@
-import React from 'react'
-import { FormGroup, InputGroup } from '@blueprintjs/core';
+import React, { useState, useCallback } from 'react'
+import {
+ FormGroup, InputGroup, RadioGroup, Radio,
+} from '@blueprintjs/core';
 import Accordion from 'Components/Accordion'
 import AccordionItem from 'Components/Accordion/AccordionItem'
 import './AccordionTest.scss'
 
 export default function AccordionTest() {
+  const [accordionMode, setMode] = useState('single')
+  const toggleMode = useCallback((event) => {
+    setMode(event.target.value)
+  }, [accordionMode])
+
   return (
     <div className="accordion-page">
       <h2>Accordion Vestmark</h2>
+      <div className="controls">
+        <RadioGroup
+          label="Choose Accordion Mode"
+          onChange={toggleMode}
+          inline
+          selectedValue={accordionMode}
+        >
+          <Radio label="Single expand mode" value="single" />
+          <Radio label="Multi expand mode" value="multi" />
+        </RadioGroup>
+      </div>
       <div className="accordion-wrapper" style={{ width: '500px' }}>
-        <Accordion>
-
+        <Accordion accordionMode={accordionMode}>
           <AccordionItem expanded title="Panel Alpha">
             <div className="accordion-form">
               <FormGroup

@@ -6,3 +6,14 @@
     font-size: 14px;
   }
 }
+
+.controls {
+  margin-bottom: 30px;
+
+  .bp3-control {
+    font-size: 14px;
+    .bp3-control-indicator {
+      font-size: 14px
+    }
+  }
+}
