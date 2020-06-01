@@ -22,7 +22,7 @@ function flattenChildPanels(panel, store = []) {
 
 export default class Accordion extends React.Component {
   static defaultProps = {
-    accordionMode: 'single', // or multi
+    accordionMode: 'multi', // or multi
   }
 
   state = {
@@ -68,11 +68,15 @@ export default class Accordion extends React.Component {
   }
 
   focusHandler = () => {
+    const { onFocus } = this.props
     this.setState({ focused: true })
     if (this.focusIndex === -1) {
       this.focusIndex = 0
     }
     this.focusPanelByIndex(this.focusIndex)
+    if (onFocus) {
+      onFocus()
+    }
   }
 
   blurHandler = () => {
@@ -80,6 +84,8 @@ export default class Accordion extends React.Component {
   }
 
   handleKeyPress = (event) => {
+    console.log(event)
+    console.log(event.currentTarget)
     switch (event.keyCode) {
       case KEY_CODES.down:
         this.focusPanelByIndex(this.focusIndex + 1)
@@ -143,24 +149,19 @@ export default class Accordion extends React.Component {
     const { children } = this.props
     const { focused, activePanelId } = this.state
     return (
-      <>
-        <div
-          role="tree"
-          tabIndex="0"
-          className={cn('vm v-accordion', { focused })}
-          onFocus={this.focusHandler}
-          onBlur={this.blurHandler}
-          onKeyDown={this.handleKeyPress}
-          {
-            ...(activePanelId && { 'aria-activedescendant': activePanelId })
-          }
-        >
-          { this.renderPanels(children) }
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <button onClick={this.test}>Test</button>
-        </div>
-      </>
+      <div
+        role="tree"
+        tabIndex="0"
+        className={cn('vm v-accordion', { focused })}
+        onFocus={this.focusHandler}
+        onBlur={this.blurHandler}
+        onKeyDown={this.handleKeyPress}
+        {
+          ...(activePanelId && { 'aria-activedescendant': activePanelId })
+        }
+      >
+        { this.renderPanels(children) }
+      </div>
     )
   }
 }

@@ -9,7 +9,7 @@ $head-hover: #ebebeb;
   outline: 0;
 
   &.focused {
-    border-top: 1px solid lightpink;
+    // border-top: 1px solid lightpink;
 
     .ac-link.v-focus {
       box-shadow: inset 0 0 0 2px rgba(94, 92, 92, 0.3);
@@ -21,14 +21,43 @@ $head-hover: #ebebeb;
       display: flex;
       align-items: center;
       padding: 4px 8px;
+      color: #4bb0ca;
+    
+      &:hover {
+        cursor: pointer;
+        color: black;
+        background: rgba(113, 113, 113, 0.25);
+      }
+      &:active {
+        color: #4bb0ca;
+        background: #ffffff;
+        box-shadow: inset 0 0 0 2px rgba(94, 92, 92, 0.3)
+      }
+
+      &.v-expanded {
+        color: #777;
+      }
 
       &.v-selected {
-        background-color: $selected;
-        color: #fff;
+        // background-color: $selected;
+        // color: #fff;
+        font-weight: 600;
+        color: #777;
+
+        &:hover {
+          
+          // font-weight: normal;
+          
+        }
+
+        &:active {
+          color: #777;
+        }
       }
 
       .v-caret {
         margin-left: auto;
+        color: #000;
       }
     }
 

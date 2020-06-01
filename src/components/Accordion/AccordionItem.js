@@ -84,7 +84,8 @@ export default class AccordionItem extends React.Component {
         aria-expanded={expanded && children ? 'true' : 'false'}
       >
         <span
-          className={cn('ac-header ac-link', { 'v-focus': focused, 'v-selected': selected })}
+          className={cn('ac-header ac-link',
+            { 'v-focus': focused, 'v-selected': selected, 'v-expanded': expanded })}
           onClick={() => panelHeadClickHandler(this)}
         >
           {title}
