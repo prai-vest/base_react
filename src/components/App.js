@@ -1,4 +1,4 @@
-import { hot } from 'react-hot-loader/root'
+// import { hot } from 'react-hot-loader/root'
 import {
   BrowserRouter as Router, Route, Switch, Link,
 } from 'react-router-dom'
@@ -30,7 +30,7 @@ function App() {
         <div className="container">
           <Switch>
             {/* <Route exact path="/" component={FormTest} /> */}
-            <Route exact path="/" component={AccordionTest} />
+            <Route exact path="/" component={FormTest} />
             {/* <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />
@@ -43,4 +43,5 @@ function App() {
   )
 }
 
-export default hot(App)
+// export default hot(App)
+export default App

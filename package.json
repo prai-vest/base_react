@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.dev",
+    "ready-prod": "webpack --config ./webpack.config.prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -41,6 +42,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.10.1",
     "@blueprintjs/core": "^3.26.1",
     "@blueprintjs/datetime": "^3.18.1",
     "@blueprintjs/icons": "^3.16.0",
@@ -69,6 +71,7 @@
     "date-fns": "^2.14.0",
     "eslint": "6.8.0",
     "express": "^4.17.1",
+    "express-history-api-fallback": "^2.2.1",
     "normalize.css": "^8.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
