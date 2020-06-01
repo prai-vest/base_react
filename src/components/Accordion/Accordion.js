@@ -86,6 +86,9 @@ export default class Accordion extends React.Component {
   }
 
   handleKeyPress = (event) => {
+    if (document.activeElement !== this.accordionRef.current) {
+      return
+    }
     switch (event.keyCode) {
       case KEY_CODES.down:
         this.focusPanelByIndex(this.focusIndex + 1)
