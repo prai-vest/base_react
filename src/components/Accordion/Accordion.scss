@@ -15,6 +15,10 @@ $accordion-border: rgba(0,0,0,0.2);
     .ac-link.v-focus {
       box-shadow: inset 0 0 0 2px rgba(94, 92, 92, 0.3);
     }
+    .ac-link.v-selected {
+      font-weight: 600;
+      color: #777;
+    }
   }
 
   .accordion-item {
@@ -23,7 +27,7 @@ $accordion-border: rgba(0,0,0,0.2);
       align-items: center;
       padding: 4px 8px;
       color: #4bb0ca;
-    
+
       &:hover {
         cursor: pointer;
         color: black;
@@ -42,13 +46,13 @@ $accordion-border: rgba(0,0,0,0.2);
       &.v-selected {
         // background-color: $selected;
         // color: #fff;
-        font-weight: 600;
-        color: #777;
+        // font-weight: 600;
+        // color: #777;
 
         &:hover {
-          
+
           // font-weight: normal;
-          
+
         }
 
         &:active {
