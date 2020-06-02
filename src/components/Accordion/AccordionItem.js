@@ -89,7 +89,7 @@ export default class AccordionItem extends React.Component {
           onClick={() => panelHeadClickHandler(this)}
         >
           {title}
-          {children && <Icon tabIndex="-1" icon={icon} className="v-caret" />}
+          {children && <Icon icon={icon} className="v-caret" />}
         </span>
         { children && (
           <div role="group" className="accordion-group" aria-hidden={expanded ? 'false' : 'true'}>

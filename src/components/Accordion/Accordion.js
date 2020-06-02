@@ -44,6 +44,11 @@ export default class Accordion extends React.Component {
 
   componentDidMount() {
     this.createFlattenedPanelsStore()
+    const svgs = this.accordionRef.current
+      .querySelectorAll('svg')
+    Array.from(svgs).forEach((item) => {
+      item.setAttribute('focusable', 'false')
+    })
   }
 
   focusPanelByIndex = (idx) => {
@@ -86,9 +91,12 @@ export default class Accordion extends React.Component {
   }
 
   handleKeyPress = (event) => {
-    if (document.activeElement !== this.accordionRef.current) {
+    if (document.activeElement !== this.accordionRef.current
+      && !document.activeElement.matches('.ac-header')
+    ) {
       return
     }
+    console.log('here')
     switch (event.keyCode) {
       case KEY_CODES.down:
         this.focusPanelByIndex(this.focusIndex + 1)
