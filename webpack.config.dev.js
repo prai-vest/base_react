@@ -16,6 +16,7 @@ module.exports = merge(common, {
     contentBase: './dist',
     historyApiFallback: true,
     // hot: true,
+    disableHostCheck: true,
     port: 8004,
   },
   output: {
