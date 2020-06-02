@@ -15,6 +15,7 @@ import BPHome from 'Components/BPHome'
 import BPComponents from 'Components/BPComponents/VMSelect'
 import FormTest from 'Components/TestPages/FormTest'
 import AccordionTest from 'Components/TestPages/AccordionTest'
+import Presentation from 'Components/TestPages/Presentation'
 import Demo from 'Components/demo'
 import './App.scss'
 
@@ -38,7 +39,7 @@ function App() {
             <li><Link to="/formtest">Form-Test</Link></li>
           </ul>
         </nav> */}
-        <Navbar>
+        {/* <Navbar>
           <NavbarGroup align={Alignment.LEFT}>
             <NavbarHeading>DEMO</NavbarHeading>
             <NavbarDivider />
@@ -51,11 +52,12 @@ function App() {
             </Link>
 
           </NavbarGroup>
-        </Navbar>
+        </Navbar> */}
         <div className="container">
           <Switch>
-            <Route exact path="/" component={AccordionTest} />
-            <Route exact path="/form" component={FormTest} />
+            {/* <Route exact path="/" component={AccordionTest} /> */}
+            {/* <Route exact path="/form" component={FormTest} /> */}
+            <Route exact path="/" from component={Presentation} />
             {/* <Route path="/components" component={Demo} />
             <Route path="/kendoForm" component={KendoFormExample} />
             <Route path="/bpcomponents" component={BPComponents} />

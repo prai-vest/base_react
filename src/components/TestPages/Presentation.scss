@@ -1,0 +1,97 @@
+.indent-1 {
+  margin-left: 20px;
+}
+
+.indent-2 {
+  margin-left: 40px;
+}
+
+.present-page {
+  > h2 {
+    color: rgba(189, 177, 177, 0.438);
+    display: flex;
+
+    span.active {
+      color: #666;
+    }
+  }
+  .l-switch {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .l-header {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  .hidden {
+    display: none;
+  }
+}
+
+.side-by-side {
+  display: flex;
+  color: #656565;
+
+
+  .element-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 70px;
+    flex: 1;
+  }
+
+  .show-interaction {
+    // display: flex;
+    // font-size: 18px;
+    position: relative;
+    display: block;
+    flex: 1;
+    font-size: 18px;
+
+    #expval-id, #activeval-id, #role-id {
+      font-size: 24px;
+      .keyword {
+        color: #ba7bcc;
+      }
+      .valueword {
+        color: #88abf9;
+        // font-size: 20px;
+      }
+    }
+
+    #role-id {
+      font-size: 18px;
+    }
+
+    #activeval-id .valueword {
+      color: #f386bf;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .options-view {
+      .keyword {
+        color: #ba7bcc;
+      }
+      .valueword {
+        color: #88abf9;
+        // font-size: 20px;
+      }
+
+      .li-keyword {
+        color: #e6a26f;
+      }
+      .li-valueword {
+        color: #7bb453;
+      }
+    }
+
+    .switch-btn {
+      position: absolute;
+      right: 40px;
+      bottom: 0;
+    }
+  }
+}
