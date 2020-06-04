@@ -4,6 +4,7 @@ import {
 } from '@blueprintjs/core'
 import cn from 'classnames'
 import makeId from 'Utils/makeId'
+import noop from 'Utils/noop'
 import './FormField.scss'
 
 const INITIAL_STATE = {
@@ -16,9 +17,19 @@ const INITIAL_STATE = {
 
 export default class FormField extends Component {
   static defaultProps = {
+    dataField: '',
     dataGrabber: (event) => event.target.value?.trim(),
     errorType: 'static',
     errors: [],
+    fieldOnBlurHandler: noop,
+    fieldOnChangeHandler: noop,
+    hint: '',
+    initialValue: null,
+    label: '',
+    registerForSyntheticReset: noop,
+    registerSyntheticResetCandidates: noop,
+    showErrorsOn: noop,
+    value: null,
   }
 
   currentInputValue = null

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.dev",
     "ready-prod": "webpack --config ./webpack.config.prod",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.9.4",
     "@babel/runtime": "^7.9.6",
+    "@types/jest": "^25.2.3",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "clean-webpack-plugin": "^3.0.0",
@@ -32,6 +33,7 @@
     "eslint-plugin-react-hooks": "^4.0.4",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^26.0.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",
@@ -69,7 +71,9 @@
     "classnames": "^2.2.6",
     "cors": "^2.8.5",
     "date-fns": "^2.14.0",
+    "enzyme": "^3.11.0",
     "eslint": "6.8.0",
+    "enzyme-adapter-react-16": "^1.15.2",
     "express": "^4.17.1",
     "express-history-api-fallback": "^2.2.1",
     "normalize.css": "^8.0.1",
@@ -83,5 +87,15 @@
     "react-router-dom": "^5.1.2",
     "webpack": "^4.43.0",
     "webpack-hot-middleware": "^2.25.0"
+  },
+  "jest": {
+    "setupFiles": [
+      "./setupTests.js"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
+      "\\.(gif|tif|eot|svg|wot)$": "<rootDir>/__mocks__/fileMock.js",
+      "^Utils(.*)$": "<rootDir>/src/utils$1"
+    }
   }
 }
