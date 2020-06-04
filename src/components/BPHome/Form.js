@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from '@blueprintjs/core'
+// import noop from 'Utils/noop'
 import Validator from './Validator'
 import './Form.scss'
 
@@ -14,11 +15,19 @@ const INITIAL_STATE = {
 }
 export default class Form extends React.PureComponent {
   static defaultProps = {
-    onValidate: (a) => a,
+    data: {},
+    mode: 'uncontrolled',
+    onValidate: (a, _) => _,
+    remoteValidate: () => [],
+    schema: {},
     showMultipleErrors: false,
   }
 
+  dataProperty = {}
+
   syntheticResetCandidates = []
+
+  fieldsWithErrors = new Set()
 
   // eslint-disable-next-line
   constructor(props) {
@@ -36,6 +45,18 @@ export default class Form extends React.PureComponent {
   }
 
   componentDidMount() {
+  }
+
+  registerErrorField = (field, inOrOut) => {
+    if (inOrOut) {
+      this.fieldsWithErrors.add(field)
+    } else {
+      this.fieldsWithErrors.delete(field)
+    }
+
+    this.setState({
+      canSubmit: this.fieldsWithErrors.size === 0,
+    })
   }
 
   resetForm = () => {
@@ -63,13 +84,17 @@ export default class Form extends React.PureComponent {
 
   fieldOnChangeHandler = (value, dataField) => {
     // const { centralizedErrorHandling } = this.props
-    const { data } = this.state
-    const newData = data
-    newData[dataField] = value
-    this.setState({ data: newData })
-    // if (centralizedErrorHandling) {
-    const errors = this.validate()
-    this.setState({ errors, canSubmit: errors.length === 0 })
+    const { mode } = this.props
+    if (mode === 'controlled') {
+      const { data } = this.state
+      const newData = data
+      newData[dataField] = value
+      const errors = this.validate(newData)
+      this.setState({ data: newData, errors, canSubmit: errors.length === 0 })
+    } else {
+      this.dataProperty[dataField] = value
+    }
+
     // }
   }
 
@@ -83,40 +108,64 @@ export default class Form extends React.PureComponent {
   }
 
   fieldOnBlurHandler = () => {
-    const errors = this.validate()
-    this.setState({ errors, canSubmit: errors.length === 0 })
+    const { mode } = this.props
+    if (mode === 'controlled') {
+      const errors = this.validate()
+      this.setState({ errors, canSubmit: errors.length === 0 })
+    }
   }
 
-  validate = () => {
-    const { schema, onValidate } = this.props
-    const { data } = this.state
+  validate = (data, validator = this.validateFn, dataField) => {
+    const { schema, onValidate, mode } = this.props
     const errors = []
     const requiredErrors = []
-    this.validateFn(data)
-    if (this.validateFn.errors?.length) {
+    let requiredFields = []
+    if (mode === 'uncontrolled') {
+      console.log(this.dataProperty)
+      validator(this.dataProperty)
+      console.log(validator.errors)
+    } else {
+      validator(data)
+    }
+    if (validator.errors?.length) {
+      /*
+        dataField is only provided in uncontrolled mode
+        in which case we need to process only dataField
+        specific errors
+      */
+      const validationErrors = mode === 'uncontrolled' && dataField
+        ? validator.errors.filter((errorObj) => errorObj.dataPath === `.${dataField}`)
+        : validator.errors
+      requiredFields = mode === 'uncontrolled' && dataField
+        ? schema.required.filter((item) => item === dataField)
+        : schema.required
+
       // separate required specific errors
-      this.validateFn.errors.forEach((item) => {
+      validationErrors.forEach((item) => {
         if (item.keyword === 'required') {
           requiredErrors.push(item)
         } else {
-          const dataField = item.dataPath.slice(1)
-          const { fieldSchema: { messages = {} } } = this.validator.getPropertySchema(dataField)
+          const currentDataField = item.dataPath.slice(1)
+          const { fieldSchema: { messages = {} } } = this.validator
+            .getPropertySchema(currentDataField)
           errors
             .push({ ...item, ...(messages[item.keyword] && { message: messages[item.keyword] }) })
         }
       })
     }
+
     // add the required errors back with right message
     // add the missing required errors (only missing property triggers aj's required, not '')
-    schema.required.forEach((dataField) => {
-      const value = data[dataField]
+    // therefore needs to be added manually
+    requiredFields.forEach((currentDataField) => {
+      const value = data[currentDataField]
       if (value === '' || value === null || value === undefined) {
-        const errorObj = requiredErrors.find((item) => item.dataPath === `.${dataField}`)
+        const errorObj = requiredErrors.find((item) => item.dataPath === `.${currentDataField}`)
         if (errorObj) {
           errors.unshift({ ...errorObj, message: 'This field is required' })
         } else {
           errors.unshift({
-            dataPath: `.${dataField}`,
+            dataPath: `.${currentDataField}`,
             keyword: 'required',
             message: 'This field is required',
           })
@@ -124,19 +173,29 @@ export default class Form extends React.PureComponent {
       }
     })
 
-    return onValidate(errors)
+    return onValidate(data, errors)
   }
 
   handleSubmit = async (event) => {
     event.preventDefault()
     this.setState({ canSubmit: false })
-    const { onSubmit, remoteValidate } = this.props
+    const { onSubmit, remoteValidate, mode } = this.props
     const { data } = this.state
-    const uiErrors = this.validate()
+    const uiErrors = this.validate(data)
+    console.log('uiErrors', uiErrors)
     if (uiErrors.length) {
       this.setState({ errors: uiErrors, showErrorsOn: () => true })
+      // adds on to showErrorsOn from above
+      if (mode === 'uncontrolled') {
+        this.syntheticResetCandidates.forEach((item) => {
+          if (item.setErrors) {
+            item.setErrors(uiErrors)
+          }
+        })
+      }
       return
     }
+
 
     let remoteErrors = []
     if (remoteValidate) {
@@ -148,13 +207,22 @@ export default class Form extends React.PureComponent {
       onSubmit(data)
     } else {
       this.setState({ errors, canSubmit: false })
+
+      this.setState({ showErrorsOn: () => true })
+      if (mode === 'uncontrolled') {
+        this.syntheticResetCandidates.forEach((item) => {
+          if (item.setErrors) {
+            item.setErrors(errors)
+          }
+        })
+      }
     }
   }
 
   renderForm = (children) => {
     console.log('[Form] rendered')
     const {
-      showMultipleErrors,
+      showMultipleErrors, mode, schema,
     } = this.props
     const { data, errors, showErrorsOn } = this.state
     const modifiedChild = React.Children.map(children, (child) => {
@@ -172,11 +240,15 @@ export default class Form extends React.PureComponent {
           dataField,
           // ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           errors: fieldSpecificErrors,
+          formValidator: this.validate,
           fieldOnBlurHandler: this.fieldOnBlurHandler,
           // fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
+          mode,
+          registerErrorField: this.registerErrorField,
           registerSyntheticResetCandidates: this.registerSyntheticResetCandidates,
           // resetErrorForField: this.resetErrorForField,
+          schema,
           showErrorsOn,
           // showErrorsOverride,
           showMultipleErrors,
@@ -193,6 +265,10 @@ export default class Form extends React.PureComponent {
     return modifiedChild
   }
 
+  test = () => {
+    console.log(this.dataProperty)
+  }
+
   render() {
     const { children, renderButtons } = this.props
     const { canSubmit } = this.state
@@ -202,6 +278,7 @@ export default class Form extends React.PureComponent {
         {!renderButtons && (
           <div className="form-buttons">
             <Button type="reset" className="reset-btn" text="Reset" />
+            {/* <Button className="reset-btn" text="Reset" /> */}
             <Button type="submit" className="submit-btn" text="Submit" disabled={!canSubmit} />
           </div>
         )}
