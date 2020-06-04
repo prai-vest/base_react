@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import {
  Position, Tooltip, Intent,
 } from '@blueprintjs/core'
-import Ajv from 'ajv'
 import cn from 'classnames'
 import makeId from 'Utils/makeId'
 import noop from 'Utils/noop'
@@ -28,13 +27,13 @@ export default class FormField extends Component {
     hint: '',
     initialValue: null,
     label: '',
-    mode: 'uncontrolled',
     registerErrorField: noop,
     registerForSyntheticReset: noop,
     registerSyntheticResetCandidates: noop,
     schema: {},
     showErrorsOn: noop,
     showMultipleErrors: false,
+    validate: noop,
     value: null,
   }
 
@@ -46,12 +45,6 @@ export default class FormField extends Component {
 
   hintId = makeId()
 
-  constructor(props) {
-    super(props)
-    const { schema } = props
-    this.fieldValidator = Ajv({ allErrors: true }).compile(schema)
-  }
-
   state = { ...INITIAL_STATE }
 
   componentDidMount() {
@@ -60,12 +53,9 @@ export default class FormField extends Component {
   }
 
   get showErrors() {
-    const {
-      showErrorsOn, errors: propErrors, mode,
-    } = this.props
-    const { errors: stateErrors } = this.state
-    const relevantErrors = mode === 'uncontrolled' ? stateErrors : propErrors
-    return showErrorsOn(this.state) && relevantErrors.length > 0
+    const { showErrorsOn } = this.props
+    const { errors } = this.state
+    return showErrorsOn(this.state) && errors.length > 0
   }
 
   reset = () => {
@@ -75,7 +65,6 @@ export default class FormField extends Component {
   handleInputChange = (onChangeArg) => {
     const {
       dataField, dataGrabber, fieldOnChangeHandler, initialValue,
-      mode, formValidator,
     } = this.props
 
     const currentInputValue = dataGrabber(onChangeArg)
@@ -84,31 +73,21 @@ export default class FormField extends Component {
       this.setState({ modified: true })
     }
     fieldOnChangeHandler(currentInputValue, dataField)
-
-    if (mode === 'uncontrolled') {
-      const errors = this.localValidate()
-      this.setState({ errors })
-    }
+    const errors = this.localValidate()
+    this.setState({ errors })
   }
 
-  handleBlur = () => {
-    const { fieldOnBlurHandler, mode } = this.props
-    fieldOnBlurHandler()
+  handleBlur = (event) => {
+    const { fieldOnBlurHandler, dataField } = this.props
+    fieldOnBlurHandler(event, dataField)
     this.setState({ visited: true, inFocus: false })
-
-    if (mode === 'uncontrolled') {
-      const errors = this.localValidate()
-      this.setState({ errors })
-    }
+    const errors = this.localValidate()
+    this.setState({ errors })
   }
 
   localValidate = () => {
-    const { formValidator, dataField, registerErrorField } = this.props
-    const errors = formValidator(
-      { [dataField]: this.currentInputValue },
-      this.fieldValidator,
-      dataField,
-    )
+    const { validate, dataField, registerErrorField } = this.props
+    const errors = validate(dataField)
     const plainErrorMessages = errors.map((item) => item.message)
     registerErrorField(this, plainErrorMessages.length)
     return plainErrorMessages
@@ -147,10 +126,6 @@ export default class FormField extends Component {
         inputDescribedBy = this.hintId
       }
 
-      const valueProps = {
-        [mode === 'uncontrolled' ? 'defaultValue' : 'value']: value,
-      }
-
       return React.cloneElement(child, {
         ...extraProps,
         'aria-invalid': this.showErrors ? 'true' : 'false',
@@ -160,7 +135,7 @@ export default class FormField extends Component {
         datafield: dataField,
         // inputRef: this.inputRef,
         id: this.fieldId,
-        ...valueProps,
+        defaultValue: value,
         onBlur: this.handleBlur,
         onChange: this.handleInputChange,
         onFocus: this.handleFocus,
@@ -183,11 +158,10 @@ export default class FormField extends Component {
 
   render() {
     const {
-      children, dataField, errorType, label, errors: propErrors, hint,
-      mode,
+      children, dataField, errorType, label, hint,
     } = this.props
-    const { errors: stateErrors } = this.state
-    const errors = mode === 'uncontrolled' ? stateErrors : propErrors
+    const { errors } = this.state
+
 
     console.log(`[FormField]: ${dataField} rendered `)
     return (

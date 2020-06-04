@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@blueprintjs/core'
-// import noop from 'Utils/noop'
+import noop from 'Utils/noop'
 import Validator from './Validator'
 import './Form.scss'
 
@@ -9,17 +9,19 @@ const INITIAL_STATE = {
   data: {},
   canSubmit: true,
   errors: [],
-  showErrorsOn(state) {
-    return state.modified || state.visited
-  },
 }
 export default class Form extends React.PureComponent {
   static defaultProps = {
     data: {},
-    mode: 'uncontrolled',
+    encompassingValidation: false,
+    onBlur: noop,
+    onFocus: noop,
     onValidate: (a, _) => _,
     remoteValidate: () => [],
     schema: {},
+    showErrorsOn(state) {
+      return state.modified || state.visited
+    },
     showMultipleErrors: false,
   }
 
@@ -32,7 +34,7 @@ export default class Form extends React.PureComponent {
   // eslint-disable-next-line
   constructor(props) {
     super(props)
-    const { schema, data } = this.props
+    const { data, schema, showErrorsOn } = this.props
     this.validator = new Validator(schema, data)
     const { validateFn, defaults } = this.validator
     const defaultData = { ...defaults, ...data }
@@ -41,10 +43,8 @@ export default class Form extends React.PureComponent {
     this.state = {
       ...INITIAL_STATE,
       data: this.defaultData,
+      showErrorsOn,
     }
-  }
-
-  componentDidMount() {
   }
 
   registerErrorField = (field, inOrOut) => {
@@ -60,7 +60,7 @@ export default class Form extends React.PureComponent {
   }
 
   resetForm = () => {
-    this.setState({ ...INITIAL_STATE })
+    this.setState({ ...INITIAL_STATE, data: this.defaultData })
     this.syntheticResetCandidates.forEach((item) => {
       if (item.reset) {
         item.reset()
@@ -74,69 +74,40 @@ export default class Form extends React.PureComponent {
     }
   }
 
-  enableSubmit = () => {
-    this.setState({ canSubmit: true })
-  }
-
-  disableSubmit = () => {
-    this.setState({ canSubmit: false })
-  }
-
   fieldOnChangeHandler = (value, dataField) => {
-    // const { centralizedErrorHandling } = this.props
-    const { mode } = this.props
-    if (mode === 'controlled') {
-      const { data } = this.state
-      const newData = data
-      newData[dataField] = value
-      const errors = this.validate(newData)
-      this.setState({ data: newData, errors, canSubmit: errors.length === 0 })
-    } else {
-      this.dataProperty[dataField] = value
-    }
-
-    // }
+    this.dataProperty[dataField] = value
   }
 
-  fieldOnFocus = () => {
-    // const { centralizedErrorHandling } = this.props
-    // if (centralizedErrorHandling) {
-    // const { data } = this.state
-    // const errors = this.validate(data)
-    // this.setState({ errors, canSubmit: errors.length === 0 })
-    // }
+  fieldOnFocus = (event, dataField) => {
+    const { onFocus } = this.props
+    onFocus(event, dataField)
   }
 
-  fieldOnBlurHandler = () => {
-    const { mode } = this.props
-    if (mode === 'controlled') {
-      const errors = this.validate()
-      this.setState({ errors, canSubmit: errors.length === 0 })
-    }
+  fieldOnBlurHandler = (event, dataField) => {
+    const { onBlur } = this.props
+    onBlur(event, dataField)
   }
 
-  validate = (data, validator = this.validateFn, dataField) => {
-    const { schema, onValidate, mode } = this.props
+  validate = (dataField) => {
+    const { schema, onValidate, encompassingValidation } = this.props
     const errors = []
     const requiredErrors = []
+    const validator = this.validateFn
     let requiredFields = []
-    if (mode === 'uncontrolled') {
-      console.log(this.dataProperty)
+
+    if (encompassingValidation || !dataField) {
       validator(this.dataProperty)
-      console.log(validator.errors)
     } else {
-      validator(data)
+      validator({ [dataField]: this.dataProperty[dataField] })
     }
+
     if (validator.errors?.length) {
-      /*
-        dataField is only provided in uncontrolled mode
-        in which case we need to process only dataField
-        specific errors
-      */
-      const validationErrors = mode === 'uncontrolled' && dataField
-        ? validator.errors.filter((errorObj) => errorObj.dataPath === `.${dataField}`)
+      const validationErrors = dataField
+        ? validator.errors
+          .filter((errorObj) => errorObj.dataPath === `.${dataField}`)
         : validator.errors
-      requiredFields = mode === 'uncontrolled' && dataField
+
+      requiredFields = dataField
         ? schema.required.filter((item) => item === dataField)
         : schema.required
 
@@ -158,7 +129,7 @@ export default class Form extends React.PureComponent {
     // add the missing required errors (only missing property triggers aj's required, not '')
     // therefore needs to be added manually
     requiredFields.forEach((currentDataField) => {
-      const value = data[currentDataField]
+      const value = this.dataProperty[currentDataField]
       if (value === '' || value === null || value === undefined) {
         const errorObj = requiredErrors.find((item) => item.dataPath === `.${currentDataField}`)
         if (errorObj) {
@@ -173,58 +144,49 @@ export default class Form extends React.PureComponent {
       }
     })
 
-    return onValidate(data, errors)
+    return onValidate(this.dataProperty, errors)
+  }
+
+  setErrorsOnField = (errors) => {
+    this.syntheticResetCandidates.forEach((item) => {
+      if (item.setErrors) {
+        item.setErrors(errors)
+      }
+    })
   }
 
   handleSubmit = async (event) => {
     event.preventDefault()
     this.setState({ canSubmit: false })
-    const { onSubmit, remoteValidate, mode } = this.props
-    const { data } = this.state
-    const uiErrors = this.validate(data)
-    console.log('uiErrors', uiErrors)
+    const { onSubmit, remoteValidate } = this.props
+    const uiErrors = this.validate()
     if (uiErrors.length) {
-      this.setState({ errors: uiErrors, showErrorsOn: () => true })
-      // adds on to showErrorsOn from above
-      if (mode === 'uncontrolled') {
-        this.syntheticResetCandidates.forEach((item) => {
-          if (item.setErrors) {
-            item.setErrors(uiErrors)
-          }
-        })
-      }
+      this.setState({ showErrorsOn: () => true })
+      this.setErrorsOnField(uiErrors)
       return
     }
 
-
     let remoteErrors = []
     if (remoteValidate) {
-      remoteErrors = await remoteValidate(data)
+      remoteErrors = await remoteValidate(this.dataProperty)
     }
+
     const errors = uiErrors.concat(remoteErrors)
-
     if (errors.length === 0) {
-      onSubmit(data)
+      onSubmit(this.dataProperty)
     } else {
-      this.setState({ errors, canSubmit: false })
-
-      this.setState({ showErrorsOn: () => true })
-      if (mode === 'uncontrolled') {
-        this.syntheticResetCandidates.forEach((item) => {
-          if (item.setErrors) {
-            item.setErrors(errors)
-          }
-        })
-      }
+      this.setState({ canSubmit: false, showErrorsOn: () => true })
+      this.setErrorsOnField(errors)
     }
   }
 
   renderForm = (children) => {
     console.log('[Form] rendered')
     const {
-      showMultipleErrors, mode, schema,
+      showMultipleErrors,
     } = this.props
     const { data, errors, showErrorsOn } = this.state
+
     const modifiedChild = React.Children.map(children, (child) => {
       if (!child.props) return child
       const { dataField } = child.props
@@ -236,22 +198,17 @@ export default class Form extends React.PureComponent {
         return React.cloneElement(child, {
           initialValue: this.defaultData[dataField],
           value: data[dataField],
-          // centralizedErrorHandling,
           dataField,
-          // ensureIfAbleToSubmit: this.ensureIfAbleToSubmit,
           errors: fieldSpecificErrors,
           formValidator: this.validate,
           fieldOnBlurHandler: this.fieldOnBlurHandler,
-          // fieldOnFocus: this.fieldOnFocus,
+          fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
-          mode,
           registerErrorField: this.registerErrorField,
           registerSyntheticResetCandidates: this.registerSyntheticResetCandidates,
-          // resetErrorForField: this.resetErrorForField,
-          schema,
           showErrorsOn,
-          // showErrorsOverride,
           showMultipleErrors,
+          validate: this.validate,
         })
       }
 
@@ -263,10 +220,6 @@ export default class Form extends React.PureComponent {
       return child
     })
     return modifiedChild
-  }
-
-  test = () => {
-    console.log(this.dataProperty)
   }
 
   render() {
