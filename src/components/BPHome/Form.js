@@ -1,13 +1,13 @@
-import React from 'react'
 import { Button } from '@blueprintjs/core'
+import React from 'react'
 import noop from 'Utils/noop'
 import Validator from './Validator'
 import './Form.scss'
 
 // centralizedErrorHandling: true,
 const INITIAL_STATE = {
-  data: {},
   canSubmit: true,
+  data: {},
   errors: [],
 }
 export default class Form extends React.PureComponent {
@@ -196,19 +196,19 @@ export default class Form extends React.PureComponent {
           .map((errorObj) => errorObj.message)
 
         return React.cloneElement(child, {
-          initialValue: this.defaultData[dataField],
-          value: data[dataField],
           dataField,
           errors: fieldSpecificErrors,
-          formValidator: this.validate,
           fieldOnBlurHandler: this.fieldOnBlurHandler,
-          fieldOnFocus: this.fieldOnFocus,
           fieldOnChangeHandler: this.fieldOnChangeHandler,
+          fieldOnFocusHandler: this.fieldOnFocus,
+          formValidator: this.validate,
+          initialValue: this.defaultData[dataField],
           registerErrorField: this.registerErrorField,
           registerSyntheticResetCandidates: this.registerSyntheticResetCandidates,
           showErrorsOn,
           showMultipleErrors,
           validate: this.validate,
+          value: data[dataField],
         })
       }
 
@@ -235,7 +235,7 @@ export default class Form extends React.PureComponent {
             <Button type="submit" className="submit-btn" text="Submit" disabled={!canSubmit} />
           </div>
         )}
-        {renderButtons && renderButtons({ formRef: this.formRef, canSubmit })}
+        {renderButtons && renderButtons({ canSubmit, formRef: this.formRef })}
       </form>
     )
   }

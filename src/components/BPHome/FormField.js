@@ -1,13 +1,13 @@
-import React, { Component } from 'react'
 import {
- Position, Tooltip, Intent,
+  Intent, Position, Tooltip,
 } from '@blueprintjs/core'
+import React, { Component } from 'react'
 import cn from 'classnames'
 import makeId from 'Utils/makeId'
 import noop from 'Utils/noop'
 import './FormField.scss'
 
-const INITIAL_STATE = {
+export const INITIAL_STATE = {
   errors: [],
   inFocus: false,
   modified: false,
@@ -21,9 +21,9 @@ export default class FormField extends Component {
     dataGrabber: (event) => event.target.value?.trim(),
     errorType: 'static',
     errors: [],
-    formValidator: () => [],
     fieldOnBlurHandler: noop,
     fieldOnChangeHandler: noop,
+    fieldOnFocus: noop,
     hint: '',
     initialValue: null,
     label: '',
@@ -34,10 +34,8 @@ export default class FormField extends Component {
     showErrorsOn: noop,
     showMultipleErrors: false,
     validate: noop,
-    value: null,
+    value: undefined,
   }
-
-  currentInputValue = null
 
   errorId = makeId()
 
@@ -68,7 +66,6 @@ export default class FormField extends Component {
     } = this.props
 
     const currentInputValue = dataGrabber(onChangeArg)
-    this.currentInputValue = currentInputValue
     if (currentInputValue !== initialValue) {
       this.setState({ modified: true })
     }
@@ -80,7 +77,7 @@ export default class FormField extends Component {
   handleBlur = (event) => {
     const { fieldOnBlurHandler, dataField } = this.props
     fieldOnBlurHandler(event, dataField)
-    this.setState({ visited: true, inFocus: false })
+    this.setState({ inFocus: false, visited: true })
     const errors = this.localValidate()
     this.setState({ errors })
   }
@@ -98,17 +95,18 @@ export default class FormField extends Component {
     const errors = allErrors
       .filter((item) => item.dataPath === `.${dataField}`)
       .map((errorObj) => errorObj.message)
-    console.log(errors)
     this.setState({ errors })
   }
 
-  handleFocus = () => {
-    this.setState({ touched: true, inFocus: true })
+  handleFocus = (event) => {
+    const { dataField, fieldOnFocusHandler } = this.props
+    this.setState({ inFocus: true, touched: true })
+    fieldOnFocusHandler(event, dataField)
   }
 
   renderFormField(children, fieldErrors) {
     const {
-      dataField, errorType, mode,
+      dataField, errorType,
       registerSyntheticResetCandidates, value, hint,
     } = this.props
 
@@ -128,14 +126,15 @@ export default class FormField extends Component {
 
       return React.cloneElement(child, {
         ...extraProps,
-        'aria-invalid': this.showErrors ? 'true' : 'false',
         'aria-describedby': inputDescribedBy,
+        'aria-invalid': this.showErrors ? 'true' : 'false',
         className: cn('vm', 'input'),
-        intent: this.showErrors ? Intent.DANGER : '', /* Blueprint specific */
+        /* Blueprint specific */
         datafield: dataField,
+        defaultValue: value,
         // inputRef: this.inputRef,
         id: this.fieldId,
-        defaultValue: value,
+        intent: this.showErrors ? Intent.DANGER : '',
         onBlur: this.handleBlur,
         onChange: this.handleInputChange,
         onFocus: this.handleFocus,
@@ -163,7 +162,7 @@ export default class FormField extends Component {
     const { errors } = this.state
 
 
-    console.log(`[FormField]: ${dataField} rendered `)
+    // console.log(`[FormField]: ${dataField} rendered `)
     return (
       <div className="form-field">
         {label && <label htmlFor={this.fieldId}>{label}</label>}

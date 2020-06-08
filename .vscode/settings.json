@@ -3,6 +3,6 @@
     "javascript",
     "javascriptreact"
   ],
-  "javascript.validate.enable": false,
+  "javascript.validate.enable": true,
   "typescript.validate.enable": false
 }

@@ -22,7 +22,8 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "sort-keys-fix"
     ],
     "rules": {
         "no-console": 0,
@@ -32,6 +33,7 @@
         "indent": 0,
         "import/extensions":0,
         "no-tabs": 0,
+        "sort-keys-fix/sort-keys-fix": "warn",
         "no-plusplus": 0,
         "no-underscore-dangle": 0,
         "react/static-property-placement": 0,
