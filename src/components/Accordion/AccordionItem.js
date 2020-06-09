@@ -1,12 +1,23 @@
 import React from 'react'
 import cn from 'classnames'
 import { Icon } from '@blueprintjs/core';
+import noop from 'Utils/noop'
 
 export default class AccordionItem extends React.Component {
+  static defaultProps = {
+    depth: 1,
+    expanded: false,
+    id: '',
+    panelHeadClickHandler: noop,
+    ref: null,
+    title: '',
+    unmountHandler: noop,
+  }
+
   state = {
+    expanded: this.props.expanded, // eslint-disable-line react/destructuring-assignment
     focused: false,
     selected: false,
-    expanded: this.props.expanded,
   }
 
   childPanels = []
@@ -19,7 +30,7 @@ export default class AccordionItem extends React.Component {
   }
 
   togglePanel = (selected = true) => new Promise((resolve) => {
-    this.setState((state) => ({ selected, expanded: !state.expanded }),
+    this.setState((state) => ({ expanded: !state.expanded, selected }),
       () => {
         const { expanded } = this.state
         resolve(expanded)
@@ -57,7 +68,6 @@ export default class AccordionItem extends React.Component {
           depth: depth + 1,
           id: `panel-d.${depth + 1}${index}`,
           panelHeadClickHandler,
-          parentRef: this,
           ref: this.registerPanelR,
           unmountHandler: this.deregisterPanelR,
         })
@@ -85,7 +95,7 @@ export default class AccordionItem extends React.Component {
       >
         <span
           className={cn('ac-header ac-link',
-            { 'v-focus': focused, 'v-selected': selected, 'v-expanded': expanded })}
+            { 'v-expanded': expanded, 'v-focus': focused, 'v-selected': selected })}
           onClick={() => panelHeadClickHandler(this)}
         >
           {title}

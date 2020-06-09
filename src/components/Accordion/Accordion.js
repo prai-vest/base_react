@@ -5,9 +5,9 @@ import './Accordion.scss'
 
 const KEY_CODES = {
   down: 40,
-  up: 38,
-  space: 32,
   enter: 13,
+  space: 32,
+  up: 38,
 }
 
 function flattenChildPanels(panel, store = []) {
@@ -34,6 +34,9 @@ export default class Accordion extends React.Component {
 
   childPanels = []
 
+  // stores flattened representation of accordion
+  // panels of unknown depth for ease of traversing
+  // during keyboard navigation
   flattenedPanelsStore = []
 
   activePanel = null
@@ -44,6 +47,8 @@ export default class Accordion extends React.Component {
 
   componentDidMount() {
     this.createFlattenedPanelsStore()
+
+    // IE fix for making panel caret unfocusable
     const svgs = this.accordionRef.current
       .querySelectorAll('svg')
     Array.from(svgs).forEach((item) => {
