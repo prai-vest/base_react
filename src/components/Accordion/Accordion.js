@@ -9,7 +9,9 @@ const KEY_CODES = {
   space: 32,
   up: 38,
 }
-
+/*
+  transforms a tree-like structure into a flat array
+*/
 function flattenChildPanels(panel, store = []) {
   if (panel.childPanels.length) {
     panel.childPanels.forEach((item) => {
@@ -22,7 +24,7 @@ function flattenChildPanels(panel, store = []) {
 
 export default class Accordion extends React.Component {
   static defaultProps = {
-    accordionMode: 'multi', // or multi
+    mode: 'single', // or multiple
   }
 
   state = {
@@ -60,6 +62,7 @@ export default class Accordion extends React.Component {
     if (idx < 0 || idx >= this.flattenedPanelsStore.length) {
       return
     }
+    // remove focus from now old active panel
     if (this.flattenedPanelsStore.includes(this.activePanel)) {
       this.activePanel.setFocus(false)
     }
@@ -121,9 +124,9 @@ export default class Accordion extends React.Component {
   }
 
   panelHeadClickHandler = async (panelInstance) => {
-    const { accordionMode } = this.props
+    const { mode } = this.props
     // if accordion mode is single
-    if (accordionMode === 'single') {
+    if (mode === 'single') {
       // get all other panels on same depth and deselect/unexpand them
       const sameDepthPanels = this.flattenedPanelsStore.filter(
         (panel) => panel.props.depth === panelInstance.props.depth
