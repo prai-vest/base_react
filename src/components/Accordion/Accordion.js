@@ -83,28 +83,26 @@ export default class Accordion extends React.Component {
   }
 
   focusHandler = () => {
-    const { onFocus } = this.props
     this.setState({ focused: true })
     if (this.focusIndex === -1) {
       this.focusIndex = 0
     }
     this.focusPanelByIndex(this.focusIndex)
-    if (onFocus) {
-      onFocus()
-    }
   }
 
   blurHandler = () => {
     this.setState({ focused: false })
   }
 
-  handleKeyPress = (event) => {
-    if (document.activeElement !== this.accordionRef.current
+  // document.activeElement not mockable
+  /* istanbul ignore next */
+  filterEventSource = () => document.activeElement !== this.accordionRef.current
       && !document.activeElement.matches('.ac-header')
-    ) {
+
+  handleKeyPress = (event) => {
+    if (this.filterEventSource()) {
       return
     }
-    console.log('here')
     switch (event.keyCode) {
       case KEY_CODES.down:
         this.focusPanelByIndex(this.focusIndex + 1)

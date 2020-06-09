@@ -23,11 +23,11 @@ export default function AccordionTest() {
           selectedValue={accordionMode}
         >
           <Radio label="Single expand mode" value="single" />
-          <Radio label="Multi expand mode" value="multi" />
+          <Radio label="Multi expand mode" value="multiple" />
         </RadioGroup>
       </div>
       <div className="accordion-wrapper" style={{ width: '500px' }}>
-        <Accordion accordionMode={accordionMode}>
+        <Accordion mode={accordionMode}>
           <AccordionItem expanded title="Panel Alpha">
             <div className="accordion-form">
               <FormGroup

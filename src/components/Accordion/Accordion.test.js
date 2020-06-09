@@ -10,6 +10,13 @@ const wait = (waitTime = 10) => new Promise((resolve) => {
   }, waitTime)
 })
 
+const KEY_CODES = {
+  down: 40,
+  enter: 13,
+  space: 32,
+  up: 38,
+}
+
 describe('Accordion', () => {
   it('generates a flattened store of child panels on mount', () => {
     const localWrapper = mount(
@@ -116,6 +123,25 @@ describe('Accordion', () => {
       // activePanelId also changes
       expect(wrapper.state().activePanelId).toBe(itemTwo.props().id)
     })
+
+    it('focusPanelByIndex() ignores argument out of range', () => {
+      // recap: currently item two is expanded and focused
+      expect(itemTwo.state().expanded).toBe(true)
+      expect(itemTwo.state().focused).toBe(true)
+
+      instance.focusPanelByIndex(0)
+      expect(itemOne.state().focused).toBe(true)
+      expect(instance.activePanel).toBe(itemOne.instance())
+
+      // out of bounds index
+      instance.focusPanelByIndex(-1)
+      expect(itemOne.state().focused).toBe(true)
+      expect(instance.activePanel).toBe(itemOne.instance())
+
+      instance.focusPanelByIndex(10)
+      expect(itemOne.state().focused).toBe(true)
+      expect(instance.activePanel).toBe(itemOne.instance())
+    })
   })
 
   describe('behaviour panel click (multi mode)', () => {
@@ -154,6 +180,82 @@ describe('Accordion', () => {
       expect(wrapper.find('.mello').exists()).toBe(true)
       // Item one is still open
       expect(wrapper.find({ title: 'Item One - Child Two' }).exists()).toBe(true)
+    })
+
+    describe('Keyboard navigation', () => {
+      let spyFocusHandler
+      let spyClickHandler
+      let spyFilterEventSource
+      beforeAll(() => {
+        instance.focusIndex = -1 // resetting to default
+        spyFocusHandler = jest.spyOn(instance, 'focusPanelByIndex')
+        spyClickHandler = jest.spyOn(instance, 'panelHeadClickHandler')
+          .mockImplementation(() => {})
+        spyFilterEventSource = jest.spyOn(instance, 'filterEventSource')
+        // wrapper.update()
+      })
+
+      beforeEach(() => {
+        jest.clearAllMocks()
+      })
+
+      it('should set focus on the first item when the accordion is focused', () => {
+        expect(wrapper.state().focused).toBe(false)
+        wrapper.simulate('focus')
+
+        expect(wrapper.state().focused).toBe(true)
+        expect(spyFocusHandler).toHaveBeenCalledWith(0)
+      })
+
+      it('should set focused to false on blur', () => {
+        expect(wrapper.state().focused).toBe(true)
+        wrapper.simulate('blur')
+        expect(wrapper.state().focused).toBe(false)
+      })
+
+      it('should call focusPanelIndex and clickHandler with appropriate argument on keyboard navigation', () => {
+        spyFilterEventSource.mockImplementation(() => false)
+        expect(instance.focusIndex).toBe(0) // recap we're at index 0
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        // wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+
+        expect(spyFocusHandler).toHaveBeenCalledWith(1) // now at index 1
+        expect(instance.focusIndex).toBe(1)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        expect(spyFocusHandler).toHaveBeenLastCalledWith(3) // now at index 3
+        expect(instance.focusIndex).toBe(3)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
+        expect(spyFocusHandler).toHaveBeenLastCalledWith(2) // now at index 2
+        expect(instance.focusIndex).toBe(2)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.space }) // space to triger panel-click
+        expect(spyClickHandler).toHaveBeenCalled()
+        expect(spyClickHandler).toHaveBeenLastCalledWith(instance.flattenedPanelsStore[2])
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.enter }) // enter to triger panel-click
+        expect(spyClickHandler).toHaveBeenCalledTimes(2)
+        expect(spyClickHandler).toHaveBeenLastCalledWith(instance.flattenedPanelsStore[2])
+
+        expect(spyFocusHandler).toHaveBeenCalledTimes(4)
+        // other keycodes are not recognized
+        wrapper.simulate('keydown', { keyCode: 14 })
+        expect(spyClickHandler).toHaveBeenCalledTimes(2) // function call numbers didn't change
+        expect(spyFocusHandler).toHaveBeenCalledTimes(4)
+      })
+
+      it('should skip keyboard interaction if filterEventSource returns true', () => {
+        spyFilterEventSource.mockImplementation(() => true)
+        const currentFocusedIndex = instance.focusIndex
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        expect(instance.focusIndex).toBe(currentFocusedIndex)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
+        expect(instance.focusIndex).toBe(currentFocusedIndex)
+      })
     })
   })
 })
