@@ -63,7 +63,10 @@ export default function AccordionTest() {
           </AccordionItem>
 
           <AccordionItem title="Simple Item: Projects">
-            <AccordionItem title="Sales Forecasts" />
+            <AccordionItem title="Sales Forecasts">
+              <AccordionItem title="Sales Forecast - 1" />
+              <AccordionItem title="Sales Forecast - 2" />
+            </AccordionItem>
             <AccordionItem title="Sales Reports" />
           </AccordionItem>
         </Accordion>
