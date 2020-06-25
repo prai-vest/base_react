@@ -2,7 +2,7 @@ $regular-hover: #e2e2e2;
 $head-hover: #ebebeb;
 $box-shadow-color: rgba(94, 92, 92, 0.3);
 $accordion-border: rgba(0,0,0,0.2);
-$accordion-header-normal: #4bb0ca;
+$accordion-text-header-normal: #4bb0ca;
 $accordion-text-header-expanded: #777; 
 
 
@@ -30,7 +30,7 @@ $accordion-text-header-expanded: #777;
         background: rgba(113, 113, 113, 0.25);
       }
       &:active {
-        color: $accordion-header-normal;
+        color: $accordion-text-header-normal;
         background: #ffffff;
         box-shadow: inset 0 0 0 2px $box-shadow-color;
       }

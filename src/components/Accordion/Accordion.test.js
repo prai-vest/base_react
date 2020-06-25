@@ -18,29 +18,37 @@ const KEY_CODES = {
 }
 
 describe('Accordion', () => {
-  it('generates a flattened store of child panels on mount', () => {
-    const localWrapper = mount(
-      <Accordion>
-        <AccordionItem title="Item One" />
-        <AccordionItem title="Item Two" />
-      </Accordion>,
-    )
-    const localInstance = localWrapper.instance()
-
-    expect(localInstance.childPanels.length).toBe(2)
-    expect(localInstance.flattenedPanelsStore.length).toBe(2)
-
-    // svg's are not focusable
-    localWrapper.find('.v-caret svg').forEach((svg) => {
-      const focusable = svg.getDOMNode().getAttribute('focusable')
-      expect(focusable).toBe('false')
+  describe('Generic behavior', () => {
+    let wrapper
+    let instance
+    beforeAll(() => {
+      wrapper = mount(
+        <Accordion>
+          <AccordionItem title="Item One" />
+          <AccordionItem title="Item Two" />
+        </Accordion>,
+      )
+      instance = wrapper.instance()
+    })
+    it('generates a flattened store of child panels on mount', () => {
+      expect(instance.childPanels.length).toBe(2)
+      expect(instance.flattenedPanelsStore.length).toBe(2)
     })
 
-    // Panels have the right depth
-    localWrapper.find(AccordionItem).forEach((panel) => {
-      expect(panel.props().depth).toBe(2)
+    it('should ensure that svg\'s are not focusable', () => {
+      wrapper.find('.v-caret svg').forEach((svg) => {
+        const focusable = svg.getDOMNode().getAttribute('focusable')
+        expect(focusable).toBe('false')
+      })
+    })
+
+    it('should provide proper depth value prop to the accordion items/panels', () => {
+      wrapper.find(AccordionItem).forEach((panel) => {
+        expect(panel.props().depth).toBe(2)
+      })
     })
   })
+
 
   describe('behavior panel click (single mode)', () => {
     /* note state is deliberately shared between tests in this
