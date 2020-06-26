@@ -40,19 +40,19 @@ describe('AccordionItem', () => {
       expect(wrapper.state().selected).toBe(false)
       let caret = wrapper.find(Icon)
       expect(caret.props().icon).toBe('caret-down')
-      expect(wrapper.contains(<div>hello</div>)).toBe(false)
+      expect(wrapper.find('div.v-hidden').exists()).toBe(true)
       await instance.togglePanel()
 
       expect(wrapper.state().expanded).toBe(true)
       expect(wrapper.state().selected).toBe(true)
       wrapper.update()
+      expect(wrapper.find('div.v-hidden').exists()).toBe(false)
       caret = wrapper.find(Icon)
       expect(caret.props().icon).toBe('caret-up')
-      expect(wrapper.contains(<div>hello</div>)).toBe(true)
       await instance.togglePanel()
 
       expect(wrapper.state().expanded).toBe(false)
-      expect(wrapper.state().selected).toBe(true) // note selected stayed true
+      expect(wrapper.state().selected).toBe(true)
     })
   })
 

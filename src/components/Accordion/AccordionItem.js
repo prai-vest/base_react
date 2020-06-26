@@ -30,11 +30,13 @@ export default class AccordionItem extends React.Component {
   }
 
   togglePanel = (selected = true) => new Promise((resolve) => {
-    this.setState((state) => ({ expanded: !state.expanded, selected }),
-      () => {
-        const { expanded } = this.state
-        resolve(expanded)
-      })
+    const { children } = this.props
+    this.setState((state) => ({
+        expanded: children && !state.expanded,
+        selected,
+      }), () => {
+      resolve()
+    })
   })
 
   deselectPanel = () => {
@@ -95,15 +97,19 @@ export default class AccordionItem extends React.Component {
       >
         <span
           className={cn('ac-header ac-link',
-            { 'v-expanded': expanded, 'v-focus': focused, 'v-selected': selected })}
+            { 'v-expanded': children && expanded, 'v-focus': focused, 'v-selected': selected })}
           onClick={() => panelHeadClickHandler(this)}
         >
           {title}
           {children && <Icon icon={icon} className="v-caret" />}
         </span>
         { children && (
-          <div role="group" className="accordion-group" aria-hidden={expanded ? 'false' : 'true'}>
-            {expanded && this.renderChildren(children)}
+          <div
+            role="group"
+            className={cn('accordion-group', { 'v-hidden': !expanded })}
+            aria-hidden={expanded ? 'false' : 'true'}
+          >
+            {this.renderChildren(children)}
           </div>
         )}
       </div>

@@ -57,6 +57,10 @@ $accordion-text-header-expanded: #777;
     & + .accordion-item {
       border-top: 1px solid $accordion-border;
     }
+
+    .v-hidden {
+      display: none;
+    }
   }
 
   .accordion-group {

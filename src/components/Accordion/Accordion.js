@@ -67,7 +67,7 @@ export default class Accordion extends React.Component {
       this.activePanel.setFocus(false)
     }
     this.focusIndex = idx
-    this.activePanel = this.flattenedPanelsStore[idx]
+    this.activePanel = this.flattenedPanelsStore[idx] // new active panel
     this.activePanel.setFocus(true)
     this.setState({ activePanelId: this.activePanel.props.id })
   }
@@ -76,6 +76,7 @@ export default class Accordion extends React.Component {
     this.flattenedPanelsStore = flattenChildPanels(this)
   }
 
+  // register immediate childPanels
   registerPanel = (ref) => {
     if (ref) {
       this.childPanels.push(ref)
@@ -99,20 +100,62 @@ export default class Accordion extends React.Component {
   filterEventSource = () => document.activeElement !== this.accordionRef.current
       && !document.activeElement.matches('.ac-header')
 
+  getNextFocusIndex = (direction) => {
+    const currentFocusIndex = this.focusIndex
+    const currentPanel = this.activePanel
+    const currentDepth = currentPanel.props.depth
+    if (direction === 'DOWN') {
+      const nextFocusIndex = currentFocusIndex + 1
+      // if currentPanel is closed, we can skip all it's children
+      if (currentPanel.state.expanded === false) {
+        return nextFocusIndex + flattenChildPanels(currentPanel).length
+      }
+      return nextFocusIndex
+    }
+
+    // direction 'UP'
+    const nextFocusIndex = currentFocusIndex - 1
+    if (nextFocusIndex <= 0) {
+      return nextFocusIndex
+    }
+    let nextPanel = this.flattenedPanelsStore[nextFocusIndex]
+
+    // if depth of next panel is lower, we know we're good
+    // because the panel must be open if current panel is it's child
+    if (nextPanel.props.depth < currentDepth) {
+      return nextFocusIndex
+    }
+
+    // else if the next panel's depth is higher, we'll need to get
+    // up to it's parent on same depth as currentPanel to see if the panel
+    // is open or not
+    let ct = 1
+    while (nextPanel.props.depth !== currentDepth) {
+      nextPanel = this.flattenedPanelsStore[nextFocusIndex - ct]
+      ct++
+    }
+    // if the next panel in same depth is closed
+    // we can skip all it's children and directly go to it
+    if (!nextPanel.state.expanded) {
+      return this.flattenedPanelsStore.indexOf(nextPanel)
+    }
+
+    // else carry on as usual
+    return nextFocusIndex
+  }
+
   handleKeyPress = (event) => {
     if (this.filterEventSource()) {
       return
     }
     switch (event.keyCode) {
       case KEY_CODES.down:
-        this.focusPanelByIndex(this.focusIndex + 1)
+        this.focusPanelByIndex(this.getNextFocusIndex('DOWN'))
         break
       case KEY_CODES.up:
-        this.focusPanelByIndex(this.focusIndex - 1)
+        this.focusPanelByIndex(this.getNextFocusIndex('UP'))
         break
       case KEY_CODES.space:
-        this.panelHeadClickHandler(this.activePanel)
-        break
       case KEY_CODES.enter:
         this.panelHeadClickHandler(this.activePanel)
         break
@@ -143,15 +186,14 @@ export default class Accordion extends React.Component {
       this.selectedPanel = panelInstance
     }
     await panelInstance.togglePanel()
-    this.createFlattenedPanelsStore()
     const idx = this.flattenedPanelsStore.indexOf(panelInstance)
     this.focusPanelByIndex(idx)
   }
 
   renderPanels = (children) => React.Children.map(children, (child, index) => {
-      const { depth = 0 } = child.props
+      const { depth } = child.props
       return React.cloneElement(child, {
-        depth: depth + 1,
+        depth,
         id: `panel-d.${depth + 1}${index}`,
         panelHeadClickHandler: this.panelHeadClickHandler,
         ref: this.registerPanel,
