@@ -225,6 +225,9 @@ describe('Accordion', () => {
             </AccordionItem>
             <AccordionItem title="Item Tres - Child Two" />
           </AccordionItem>
+          <AccordionItem title="Item terminal">
+            <AccordionItem title="Child -terminal" />
+          </AccordionItem>
         </Accordion>,
       )
       instance = wrapper.instance()
@@ -285,45 +288,25 @@ describe('Accordion', () => {
         expect(spyFocusHandler).toHaveBeenLastCalledWith(3)
       })
 
-      it('should call focusHandler with panelLength when called from a last visible Panel with no child', () => {
+      it('should call focusHandler with panelLength when called from last child expanded or otherwise', () => {
         wrapper.simulate('focus')
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on DOS
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on TRES
         expect(spyFocusHandler).toHaveBeenLastCalledWith(4)
-        expect(wrapper.find({ title: 'Item Tres' }).state().focused).toBe(true)
-        expect(wrapper.find({ title: 'Item Tres' }).state().expanded).toBe(false)
 
-        expect(spyClickHandler).not.toHaveBeenCalled()
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.enter })
-
-        // Tres is now open
-        expect(spyClickHandler).toHaveBeenCalled()
-        expect(wrapper.find({ title: 'Item Tres' }).state().expanded).toBe(true)
-
-        // move further down to the very last child Panel
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on Item Tres - Child One
-        expect(spyFocusHandler).toHaveBeenLastCalledWith(5)
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on Item Tres - Child two
-        // index jumped + 2 because of child One is a closed Panel with one child
-        expect(spyFocusHandler).toHaveBeenLastCalledWith(7)
-        expect(wrapper.find({ title: 'Item Tres - Child Two' }).state().focused).toBe(true)
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on unexpanded Item terminal
+        expect(spyFocusHandler).toHaveBeenLastCalledWith(8) // skipped all unexpanded children
 
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
-        // note 8 puts your index out of bounds since the indices run 0 - 6 to give you length of 8
-        const nextIndex = instance.flattenedPanelsStore.length // 8
-        expect(spyFocusHandler).toHaveBeenLastCalledWith(nextIndex)
-      })
+        expect(spyFocusHandler).toHaveBeenLastCalledWith(instance.flattenedPanelsStore.length)
 
-      it('should still call focusHandler with panelLength when called from last visible unexpanded Panel', () => {
-        wrapper.simulate('focus')
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on DOS
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // we're on TRES
-        expect(wrapper.find({ title: 'Item Tres' }).state().focused).toBe(true)
-        expect(spyFocusHandler).toHaveBeenLastCalledWith(4)
-
-        // next down key press will call spyfocusHandler with out of bounds index
-        // since the panel is not open and is the last visible panel
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.space }) // open terminal Panel
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        // we're now on the very last panel
+        expect(wrapper.find({ title: 'Child -terminal' }).state().focused).toBe(true)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
+        // note this puts you out of bounds since indices run 0 - (length - 1)
         expect(spyFocusHandler).toHaveBeenLastCalledWith(instance.flattenedPanelsStore.length)
       })
     })
@@ -346,29 +329,43 @@ describe('Accordion', () => {
         expect(wrapper.find({ title: 'Item Uno' }).state().focused).toBe(true)
       })
 
-      it('handles moving up and down with open panels with AccordionItem children', () => {
-        wrapper.simulate('focus')
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.space }) // Item one is open
+      it('handles moving up and down with open panels with AccordionItem children', async () => {
+        const itemTres = wrapper.find({ title: 'Item Tres' })
+        itemTres.find('.ac-header').at(0).simulate('click')
+        await wait()
+
+        // Item Tres is open
+        expect(wrapper.find({ title: 'Item Tres' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Item Tres' }).state().expanded).toBe(true)
+
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.down }) // active: Item Tres - Child One
+        expect(wrapper.find({ title: 'Item Tres - Child One' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Item Tres - Child One' }).state().expanded).toBe(false)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.space })
+        expect(wrapper.find({ title: 'Item Tres - Child One' }).state().expanded).toBe(true)
 
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
-        expect(wrapper.find({ title: 'Item Uno - Child One' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Child\'s child - Child One' }).state().focused).toBe(true)
 
         wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
-        expect(wrapper.find({ title: 'Item Uno - Child Two' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Item Tres - Child Two' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Child\'s child - Child One' }).state().focused).toBe(false)
 
-        wrapper.simulate('keydown', { keyCode: KEY_CODES.down })
-        expect(wrapper.find({ title: 'Item Uno - Child Two' }).state().focused).toBe(false)
-        expect(wrapper.find({ title: 'Item Dos' }).state().focused).toBe(true)
-
-        // Up
+        // UP
         wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
-        expect(wrapper.find({ title: 'Item Uno - Child Two' }).state().focused).toBe(true)
+        expect(wrapper.find({ title: 'Child\'s child - Child One' }).state().focused).toBe(true)
 
         wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
-        expect(wrapper.find({ title: 'Item Uno - Child One' }).state().focused).toBe(true)
-
+        expect(wrapper.find({ title: 'Item Tres - Child One' }).state().focused).toBe(true)
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
         wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
         expect(wrapper.find({ title: 'Item Uno' }).state().focused).toBe(true)
+
+        wrapper.simulate('keydown', { keyCode: KEY_CODES.up })
+        expect(spyFocusHandler).toHaveBeenLastCalledWith(-1)
       })
     })
   })
