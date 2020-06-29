@@ -1,5 +1,5 @@
 import React from 'react'
-// import AccordionItem from 'Components/Accordion/AccordionItem'
+// import AccordionItem from 'Components/Accordion/AccordionItems
 import cn from 'classnames'
 import './Accordion.scss'
 
@@ -95,11 +95,6 @@ export default class Accordion extends React.Component {
     this.setState({ focused: false })
   }
 
-  // document.activeElement not mockable
-  /* istanbul ignore next */
-  filterEventSource = () => document.activeElement !== this.accordionRef.current
-      && !document.activeElement.matches('.ac-header')
-
   getNextFocusIndex = (direction) => {
     const currentFocusIndex = this.focusIndex
     const currentPanel = this.activePanel
@@ -143,6 +138,11 @@ export default class Accordion extends React.Component {
     // else carry on as usual
     return nextFocusIndex
   }
+
+  // document.activeElement not mockable
+  /* istanbul ignore next */
+  filterEventSource = () => document.activeElement !== this.accordionRef.current
+      && !document.activeElement.matches('.ac-header')
 
   handleKeyPress = (event) => {
     if (this.filterEventSource()) {
